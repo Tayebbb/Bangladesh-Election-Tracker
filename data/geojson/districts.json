@@ -1,0 +1,114 @@
+{
+  "type": "FeatureCollection",
+  "name": "bangladesh_districts",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "dhaka",
+        "name": "Dhaka",
+        "division": "Dhaka"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[90.25, 23.65], [90.55, 23.65], [90.55, 23.95], [90.25, 23.95], [90.25, 23.65]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "gazipur",
+        "name": "Gazipur",
+        "division": "Dhaka"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[90.30, 23.95], [90.60, 23.95], [90.60, 24.25], [90.30, 24.25], [90.30, 23.95]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "chattogram",
+        "name": "Chattogram",
+        "division": "Chattogram"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[91.70, 22.20], [92.00, 22.20], [92.00, 22.60], [91.70, 22.60], [91.70, 22.20]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "rajshahi",
+        "name": "Rajshahi",
+        "division": "Rajshahi"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[88.50, 24.30], [88.80, 24.30], [88.80, 24.60], [88.50, 24.60], [88.50, 24.30]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "khulna",
+        "name": "Khulna",
+        "division": "Khulna"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[89.50, 22.70], [89.80, 22.70], [89.80, 23.00], [89.50, 23.00], [89.50, 22.70]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "sylhet",
+        "name": "Sylhet",
+        "division": "Sylhet"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[91.80, 24.80], [92.10, 24.80], [92.10, 25.10], [91.80, 25.10], [91.80, 24.80]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "barishal",
+        "name": "Barishal",
+        "division": "Barishal"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[90.30, 22.60], [90.60, 22.60], [90.60, 22.90], [90.30, 22.90], [90.30, 22.60]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "rangpur",
+        "name": "Rangpur",
+        "division": "Rangpur"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[89.20, 25.70], [89.50, 25.70], [89.50, 26.00], [89.20, 26.00], [89.20, 25.70]]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "mymensingh",
+        "name": "Mymensingh",
+        "division": "Mymensingh"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[[90.35, 24.70], [90.65, 24.70], [90.65, 25.00], [90.35, 25.00], [90.35, 24.70]]]
+      }
+    }
+  ]
+}

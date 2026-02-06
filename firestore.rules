@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ─── Helper: check if request comes from an authenticated admin ───
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/adminUsers/$(request.auth.uid))
+        && get(/databases/$(database)/documents/adminUsers/$(request.auth.uid)).data.role in ['admin', 'data-entry'];
+    }
+
+    // ─── Parties — public read, admin write ───
+    match /parties/{partyId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Constituencies — public read, admin write ───
+    match /constituencies/{constituencyId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Results — public read, admin write ───
+    match /results/{resultId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Candidates — public read, admin write ───
+    match /candidates/{candidateId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Election Summary — public read, admin write ───
+    match /summary/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ─── Admin Users — only the admin themselves or a super-admin can read ───
+    match /adminUsers/{uid} {
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow write: if false; // Managed via Firebase Console or Cloud Functions only
+    }
+
+    // ─── Deny everything else ───
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
