@@ -28,13 +28,13 @@ export const RESULT_STATUS = {
 
 // Map configuration
 export const MAP_CONFIG = {
-  CENTER: [23.6850, 90.3563] as [number, number], // Bangladesh center
+  CENTER: [23.5, 90.3] as [number, number], // Bangladesh center
   ZOOM: 7,
-  MIN_ZOOM: 6,
+  MIN_ZOOM: 5,
   MAX_ZOOM: 12,
   BOUNDS: [
-    [20.5, 88.0], // Southwest
-    [26.6, 92.7], // Northeast
+    [20.0, 87.0], // Southwest - extended for full visibility
+    [27.0, 93.5], // Northeast - extended for full visibility
   ] as [[number, number], [number, number]],
 } as const;
 

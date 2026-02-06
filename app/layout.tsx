@@ -50,6 +50,18 @@ export default function RootLayout({
           rel="stylesheet"
         />
         
+        {/* Preload Leaflet CSS for faster map loading */}
+        <link
+          rel="preload"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          as="style"
+        />
+        <link
+          id="leaflet-css"
+          rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        />
+        
         {/* Cloudflare Web Analytics */}
         <script
           defer
