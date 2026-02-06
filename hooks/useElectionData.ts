@@ -20,9 +20,11 @@ import type {
   Candidate,
   ElectionSummary,
   SeatCount,
+  AllianceSeatCount,
 } from '@/types';
 import { ELECTION_CONFIG } from '@/lib/constants';
 import { parties as staticParties } from '@/data/parties';
+import { aggregateAllianceSeatCounts } from '@/lib/alliances';
 
 // ============================================
 // useParties - Get all parties
@@ -197,6 +199,19 @@ export function useSeatCounts() {
   }, [results, parties]);
 
   return { seatCounts };
+}
+
+// ============================================
+// useAllianceSeatCounts - Aggregated alliance seat counts
+// ============================================
+export function useAllianceSeatCounts() {
+  const { results } = useResults();
+
+  const allianceSeatCounts = useMemo((): AllianceSeatCount[] => {
+    return aggregateAllianceSeatCounts(results);
+  }, [results]);
+
+  return { allianceSeatCounts };
 }
 
 // ============================================

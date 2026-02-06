@@ -11,6 +11,8 @@ export interface Party {
   color: string;
   symbol: string; // URL or emoji
   order: number;  // Display order
+  allianceId: string | null; // 'bnp', 'jamaat', or null for Others
+  isIndependent: boolean; // true for independent candidates
 }
 
 export interface Division {
@@ -52,11 +54,19 @@ export interface PartyVotes {
   [partyId: string]: number;
 }
 
+export interface AllianceVotes {
+  bnp: number;      // BNP-led alliance total
+  jamaat: number;   // Jamaat-led alliance total
+  others: number;   // Others + independents total
+}
+
 export interface Result {
   id: string;
   constituencyId: string;
   partyVotes: PartyVotes;
+  allianceVotes: AllianceVotes; // Auto-calculated alliance aggregation
   winnerPartyId: string | null;
+  winnerAllianceId: string | null; // 'bnp', 'jamaat', or 'others'
   winnerCandidateId: string | null;
   totalVotes: number;
   turnoutPercentage: number;
@@ -79,6 +89,18 @@ export interface SeatCount {
   leadingSeats: number; // Where leading but not declared
   totalVotes: number;
   votePercentage: number;
+  allianceId?: string | null; // For party-level seat counts
+}
+
+export interface AllianceSeatCount {
+  allianceId: string;
+  allianceName: string;
+  allianceColor: string;
+  seats: number;
+  leadingSeats: number;
+  totalVotes: number;
+  votePercentage: number;
+  parties: SeatCount[]; // Member parties breakdown
 }
 
 export interface ElectionSummary {

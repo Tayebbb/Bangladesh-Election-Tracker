@@ -1,2 +1,2 @@
-export { useParties, useResults, useSummary, useConstituencyResult, useSeatCounts, useMapData } from './useElectionData';
+export { useParties, useResults, useSummary, useConstituencyResult, useSeatCounts, useAllianceSeatCounts, useMapData } from './useElectionData';
 export { useAuth } from './useAuth';

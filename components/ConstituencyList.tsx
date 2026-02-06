@@ -5,6 +5,7 @@ import { useMemo, useState } from 'react';
 import type { Result, Party, Constituency } from '@/types';
 import { RESULT_STATUS } from '@/lib/constants';
 import { formatNumber } from '@/lib/utils';
+import { getWinnerDisplayName } from '@/lib/alliances';
 
 interface Props {
   results: Result[];
@@ -131,7 +132,9 @@ export default function ConstituencyList({ results, parties, constituencies }: P
                     <div className="flex items-center gap-2 mt-0.5">
                       <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
                         {winner ? (
-                          <span style={{ color: winner.color }} className="font-semibold">{winner.shortName}</span>
+                          <span style={{ color: winner.color }} className="font-semibold">
+                            {getWinnerDisplayName(result.winnerPartyId, true)}
+                          </span>
                         ) : (
                           'Awaiting result'
                         )}

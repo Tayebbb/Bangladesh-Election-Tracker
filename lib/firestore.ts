@@ -19,6 +19,7 @@ import {
 } from 'firebase/firestore';
 import { firestore } from './firebase';
 import { COLLECTIONS } from './constants';
+import { calculateAllianceVotes, getWinnerAllianceId } from './alliances';
 import type {
   Party,
   Constituency,
@@ -180,6 +181,10 @@ export async function saveResult(payload: SaveResultPayload): Promise<void> {
   const margin = winnerVotes - runnerUpVotes;
   const marginPercentage = totalVotes > 0 ? (margin / totalVotes) * 100 : 0;
   
+  // Calculate alliance aggregation
+  const allianceVotes = calculateAllianceVotes(partyVotes);
+  const winnerAllianceId = status === 'completed' ? getWinnerAllianceId(winnerId) : null;
+  
   // Get constituency for turnout calculation
   const constituency = await getConstituencyById(constituencyId);
   const totalVoters = constituency?.totalVoters || 0;
@@ -188,7 +193,9 @@ export async function saveResult(payload: SaveResultPayload): Promise<void> {
   const resultDoc = {
     constituencyId,
     partyVotes,
+    allianceVotes,
     winnerPartyId: status === 'completed' ? winnerId : null,
+    winnerAllianceId,
     winnerCandidateId: null, // TODO: Link to candidate
     totalVotes,
     turnoutPercentage,

@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import type { Result, Party } from '@/types';
 import { MAP_CONFIG } from '@/lib/constants';
 import { formatNumber, formatPercentage } from '@/lib/utils';
+import { getWinnerDisplayName } from '@/lib/alliances';
 
 // Lazy-load Leaflet types
 type LMap = import('leaflet').Map;
@@ -27,21 +28,30 @@ export default function MapView({ results, parties, onConstituencyClick }: Props
 
   // Build color lookup: constituencyId -> party color
   const colorMap = useMemo(() => {
-    const map: Record<string, { color: string; partyName: string; status: string; totalVotes: number; margin: number; turnout: number }> = {};
+    const map: Record<string, { color: string; partyName: string; winnerPartyId: string | null; status: string; totalVotes: number; margin: number; turnout: number }> = {};
     results.forEach(r => {
       let color = '#E5E7EB';
       let partyName = 'Pending';
+      let winnerPartyId: string | null = null;
       if (r.status === 'completed' && r.winnerPartyId) {
         const p = parties.find(x => x.id === r.winnerPartyId);
-        if (p) { color = p.color; partyName = p.shortName; }
+        if (p) { 
+          color = p.color; 
+          partyName = getWinnerDisplayName(r.winnerPartyId, true);
+          winnerPartyId = r.winnerPartyId;
+        }
       } else if (r.status === 'partial') {
         const leader = Object.entries(r.partyVotes).sort(([, a], [, b]) => b - a)[0];
         if (leader) {
           const p = parties.find(x => x.id === leader[0]);
-          if (p) { color = p.color + '99'; partyName = `${p.shortName} (leading)`; }
+          if (p) { 
+            color = p.color + '99'; 
+            partyName = `${getWinnerDisplayName(leader[0], true)} (leading)`;
+            winnerPartyId = leader[0];
+          }
         }
       }
-      map[r.constituencyId] = { color, partyName, status: r.status, totalVotes: r.totalVotes, margin: r.margin, turnout: r.turnoutPercentage };
+      map[r.constituencyId] = { color, partyName, winnerPartyId, status: r.status, totalVotes: r.totalVotes, margin: r.margin, turnout: r.turnoutPercentage };
     });
     return map;
   }, [results, parties]);

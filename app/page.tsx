@@ -9,7 +9,7 @@ import Header from '@/components/Header';
 import ResultsSummary from '@/components/ResultsSummary';
 import ConstituencyList from '@/components/ConstituencyList';
 import { PageLoader } from '@/components/LoadingSpinner';
-import { useParties, useResults, useSummary, useSeatCounts } from '@/hooks';
+import { useParties, useResults, useSummary, useSeatCounts, useAllianceSeatCounts } from '@/hooks';
 import { getConstituencies } from '@/lib/firestore';
 import type { Constituency } from '@/types';
 
@@ -24,6 +24,7 @@ export default function HomePage() {
   const { results, loading: resultsLoading } = useResults();
   const { summary, loading: summaryLoading } = useSummary();
   const { seatCounts } = useSeatCounts();
+  const { allianceSeatCounts } = useAllianceSeatCounts();
   const [constituencies, setConstituencies] = useState<Constituency[]>([]);
   const [consLoading, setConsLoading] = useState(true);
 
@@ -45,7 +46,7 @@ export default function HomePage() {
         ) : (
           <div className="space-y-8">
             {/* Election summary + metrics */}
-            <ResultsSummary summary={summary} seatCounts={seatCounts} />
+            <ResultsSummary summary={summary} seatCounts={seatCounts} allianceSeatCounts={allianceSeatCounts} />
 
             {/* Mini map preview */}
             <section>

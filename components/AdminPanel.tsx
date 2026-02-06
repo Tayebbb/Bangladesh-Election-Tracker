@@ -10,6 +10,7 @@ import type { Party, AdminUser, Result } from '@/types';
 import { divisions, getConstituencyId, getConstituencyName, type DivisionData, type DistrictData } from '@/data/divisions';
 import { saveResult, getResultByConstituency, getCandidatesByConstituency } from '@/lib/firestore';
 import { formatNumber, formatPercentage } from '@/lib/utils';
+import { getAllSelectableParties, getIndependentOption } from '@/data/parties';
 
 interface Props {
   parties: Party[];
@@ -23,6 +24,13 @@ interface VoteInput {
 }
 
 export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
+  // Use ALL registered parties + Independent option
+  const allParties = useMemo(() => {
+    const selectableParties = getAllSelectableParties();
+    const independent = getIndependentOption();
+    return independent ? [...selectableParties, independent] : selectableParties;
+  }, []);
+
   // Cascade selectors
   const [divisionId, setDivisionId] = useState('');
   const [districtId, setDistrictId] = useState('');
@@ -64,7 +72,7 @@ export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
       setExistingResult(result);
 
       // Init vote inputs from existing or blank
-      const inputs: VoteInput[] = parties.map(p => ({
+      const inputs: VoteInput[] = allParties.map(p => ({
         partyId: p.id,
         votes: result?.partyVotes[p.id] || 0,
       }));
@@ -72,10 +80,10 @@ export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
       if (result?.status) setStatus(result.status as 'partial' | 'completed');
     } catch {
       // Init blank
-      setVoteInputs(parties.map(p => ({ partyId: p.id, votes: 0 })));
+      setVoteInputs(allParties.map(p => ({ partyId: p.id, votes: 0 })));
       setExistingResult(null);
     }
-  }, [parties]);
+  }, [allParties]);
 
   // Handle cascade changes
   const handleDivisionChange = (val: string) => {
@@ -243,7 +251,7 @@ export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
 
           {/* MCQ-style party list */}
           <div className="divide-y divide-gray-50 dark:divide-slate-800">
-            {parties.map(party => {
+            {allParties.map(party => {
               const input = voteInputs.find(v => v.partyId === party.id);
               const votes = input?.votes || 0;
               const pct = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
@@ -300,8 +308,8 @@ export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Winner</p>
-                <p className="font-bold text-lg mt-1" style={{ color: parties.find(p => p.id === calculated.winnerId)?.color }}>
-                  {parties.find(p => p.id === calculated.winnerId)?.shortName || '—'}
+                <p className="font-bold text-lg mt-1" style={{ color: allParties.find(p => p.id === calculated.winnerId)?.color }}>
+                  {allParties.find(p => p.id === calculated.winnerId)?.shortName || '—'}
                 </p>
               </div>
               <div>

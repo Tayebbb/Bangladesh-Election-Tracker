@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import type { ElectionSummary, SeatCount } from '@/types';
+import type { ElectionSummary, SeatCount, AllianceSeatCount } from '@/types';
 import { ELECTION_CONFIG } from '@/lib/constants';
 import { formatNumber, formatPercentage, getRelativeTime } from '@/lib/utils';
 import SeatCounter from './SeatCounter';
@@ -9,14 +9,25 @@ import SeatCounter from './SeatCounter';
 interface Props {
   summary: ElectionSummary;
   seatCounts: SeatCount[];
+  allianceSeatCounts: AllianceSeatCount[];
 }
 
-export default function ResultsSummary({ summary, seatCounts }: Props) {
+export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts }: Props) {
   const [showAll, setShowAll] = useState(false);
+  const [expandedAlliances, setExpandedAlliances] = useState<Set<string>>(new Set());
   const { TOTAL_SEATS, MAJORITY_SEATS } = ELECTION_CONFIG;
 
-  // Top 2 parties
-  const top2 = useMemo(() => seatCounts.slice(0, 2), [seatCounts]);
+  const toggleAllianceExpanded = (allianceId: string) => {
+    setExpandedAlliances(prev => {
+      const next = new Set(prev);
+      if (next.has(allianceId)) {
+        next.delete(allianceId);
+      } else {
+        next.add(allianceId);
+      }
+      return next;
+    });
+  };
 
   return (
     <div className="space-y-6 fade-in">
@@ -35,57 +46,107 @@ export default function ResultsSummary({ summary, seatCounts }: Props) {
       {/* Seat counter bar */}
       <SeatCounter seatCounts={seatCounts} declaredSeats={summary.declaredSeats} showAll={showAll} />
 
-      {/* Top 2 party highlight cards with enhanced design */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {top2.map((sc, idx) => (
-          <div
-            key={sc.partyId}
-            className="group relative overflow-hidden rounded-2xl border border-gray-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white to-gray-50/50 dark:from-slate-900 dark:to-slate-900/50 p-5 sm:p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
-            style={{
-              borderLeftWidth: '4px',
-              borderLeftColor: sc.partyColor,
-            }}
-          >
-            {/* Background gradient accent */}
-            <div 
-              className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-5 group-hover:opacity-10 transition-opacity"
-              style={{ backgroundColor: sc.partyColor }}
-            />
-            
-            {/* Ranking badge */}
-            <div className="absolute top-3 right-3 bg-gray-100 dark:bg-slate-800 rounded-full px-2.5 py-1 text-xs font-bold text-gray-600 dark:text-gray-400">
-              #{idx + 1}
-            </div>
-            
-            <div className="relative">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-lg sm:text-xl font-extrabold tracking-tight" style={{ color: sc.partyColor }}>
-                  {sc.partyName}
-                </span>
-                <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-gray-100">{sc.seats}</span>
+      {/* Alliance highlight cards with enhanced design */}
+      <div className="grid grid-cols-1 gap-4">
+        {allianceSeatCounts.map((alliance) => {
+          const isExpanded = expandedAlliances.has(alliance.allianceId);
+          return (
+            <div
+              key={alliance.allianceId}
+              className="group relative overflow-hidden rounded-2xl border border-gray-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white to-gray-50/50 dark:from-slate-900 dark:to-slate-900/50 transition-all duration-300 hover:shadow-xl"
+              style={{
+                borderLeftWidth: '4px',
+                borderLeftColor: alliance.allianceColor,
+              }}
+            >
+              {/* Background gradient accent */}
+              <div 
+                className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl opacity-5 group-hover:opacity-10 transition-opacity"
+                style={{ backgroundColor: alliance.allianceColor }}
+              />
+              
+              {/* Main alliance info */}
+              <div className="relative p-5 sm:p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-lg sm:text-xl font-extrabold tracking-tight" style={{ color: alliance.allianceColor }}>
+                    {alliance.allianceName}
+                  </span>
+                  <span className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-gray-100">{alliance.seats}</span>
+                </div>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 text-xs text-gray-600 dark:text-gray-400">
+                  <span className="font-medium">{formatNumber(alliance.totalVotes)} votes</span>
+                  <span className="font-semibold" style={{ color: alliance.allianceColor }}>{formatPercentage(alliance.votePercentage)}</span>
+                </div>
+                {alliance.leadingSeats > 0 && (
+                  <div className="mt-3 inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-1.5">
+                    <span className="text-amber-500 text-sm">⚡</span>
+                    <span className="text-xs font-bold text-amber-700 dark:text-amber-400">+{alliance.leadingSeats} Leading</span>
+                  </div>
+                )}
+                
+                {/* Expand/Collapse button for party breakdown */}
+                {alliance.parties.length > 0 && (
+                  <button
+                    onClick={() => toggleAllianceExpanded(alliance.allianceId)}
+                    className="mt-4 w-full flex items-center justify-center gap-2 rounded-lg border border-gray-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 px-3 py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-white dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <span>{isExpanded ? 'Hide' : 'Show'} Party Breakdown ({alliance.parties.length} parties)</span>
+                    <svg 
+                      className={`h-3 w-3 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                )}
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0 text-xs text-gray-600 dark:text-gray-400">
-                <span className="font-medium">{formatNumber(sc.totalVotes)} votes</span>
-                <span className="font-semibold" style={{ color: sc.partyColor }}>{formatPercentage(sc.votePercentage)}</span>
-              </div>
-              {sc.leadingSeats > 0 && (
-                <div className="mt-3 inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-3 py-1.5">
-                  <span className="text-amber-500 text-sm">⚡</span>
-                  <span className="text-xs font-bold text-amber-700 dark:text-amber-400">+{sc.leadingSeats} Leading</span>
+
+              {/* Party breakdown table (expandable) */}
+              {isExpanded && alliance.parties.length > 0 && (
+                <div className="border-t border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-800/30 animate-slide-up">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="border-b border-gray-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 text-[10px] text-gray-600 dark:text-gray-300 font-semibold">
+                        <tr>
+                          <th className="px-4 py-2 uppercase tracking-wider">Party</th>
+                          <th className="px-4 py-2 text-right uppercase tracking-wider">Won</th>
+                          <th className="px-4 py-2 text-right hidden sm:table-cell uppercase tracking-wider">Leading</th>
+                          <th className="px-4 py-2 text-right uppercase tracking-wider">Votes</th>
+                          <th className="px-4 py-2 text-right hidden md:table-cell uppercase tracking-wider">Vote %</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                        {alliance.parties.map(party => (
+                          <tr key={party.partyId} className="hover:bg-white/50 dark:hover:bg-slate-800/50 transition-colors">
+                            <td className="flex items-center gap-2 px-4 py-2.5">
+                              <span className="h-2.5 w-2.5 flex-shrink-0 rounded-full shadow-sm" style={{ backgroundColor: party.partyColor }} />
+                              <span className="font-medium truncate text-gray-800 dark:text-gray-200">{party.partyName}</span>
+                            </td>
+                            <td className="px-4 py-2.5 text-right font-bold text-gray-900 dark:text-gray-100">{party.seats}</td>
+                            <td className="px-4 py-2.5 text-right text-gray-600 dark:text-gray-400 font-medium hidden sm:table-cell">{party.leadingSeats}</td>
+                            <td className="px-4 py-2.5 text-right font-medium text-gray-800 dark:text-gray-200">{formatNumber(party.totalVotes)}</td>
+                            <td className="px-4 py-2.5 text-right font-medium text-gray-600 dark:text-gray-400 hidden md:table-cell">{formatPercentage(party.votePercentage)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Expand all parties button */}
-      {seatCounts.length > 2 && (
+      {seatCounts.length > 0 && (
         <button
           onClick={() => setShowAll(prev => !prev)}
           className="group w-full rounded-xl border border-gray-200 dark:border-slate-700 bg-gradient-to-r from-white to-gray-50 dark:from-slate-900 dark:to-slate-800 px-4 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-200 hover:from-gray-50 hover:to-gray-100 dark:hover:from-slate-800 dark:hover:to-slate-700 transition-all duration-300 shadow-sm hover:shadow-md flex items-center justify-center gap-2"
         >
-          <span>{showAll ? 'Show Top 2 Only' : `Show All ${seatCounts.length} Parties`}</span>
+          <span>{showAll ? 'Hide All Parties' : `Show All ${seatCounts.length} Parties`}</span>
           <svg 
             className={`h-4 w-4 transition-transform duration-300 ${showAll ? 'rotate-180' : ''}`} 
             fill="none" 
