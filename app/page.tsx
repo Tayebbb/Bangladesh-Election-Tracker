@@ -19,7 +19,7 @@ import type { Constituency } from '@/types';
 // Lazy-load map to reduce initial bundle
 const MapView = dynamic(() => import('@/components/MapView'), {
   ssr: false,
-  loading: () => <div className="h-[300px] skeleton rounded-lg" />,
+  loading: () => <div className="h-[500px] sm:h-[550px] lg:h-[650px] skeleton rounded-lg" />,
 });
 
 export default function HomePage() {
@@ -92,7 +92,7 @@ export default function HomePage() {
                   </svg>
                 </a>
               </div>
-              <div className="h-[300px] sm:h-[400px] overflow-hidden rounded-xl shadow-soft-lg">
+              <div className="h-[500px] sm:h-[550px] lg:h-[650px] overflow-hidden rounded-xl shadow-soft-lg">
                 <MapView results={results} parties={parties} />
               </div>
             </section>
