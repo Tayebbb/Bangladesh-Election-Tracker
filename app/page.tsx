@@ -6,11 +6,13 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import Header from '@/components/Header';
+import ElectionEditorialHeader from '@/components/ElectionEditorialHeader';
 import ResultsSummary from '@/components/ResultsSummary';
 import ConstituencyList from '@/components/ConstituencyList';
 import { PageLoader } from '@/components/LoadingSpinner';
 import { useParties, useResults, useSummary, useSeatCounts, useAllianceSeatCounts } from '@/hooks';
 import { getConstituencies } from '@/lib/firestore';
+import { UPCOMING_ELECTION } from '@/lib/constants';
 import type { Constituency } from '@/types';
 
 // Lazy-load map to reduce initial bundle
@@ -40,6 +42,7 @@ export default function HomePage() {
   return (
     <>
       <Header />
+      <ElectionEditorialHeader data={UPCOMING_ELECTION} />
       <main className="mx-auto max-w-7xl px-3 sm:px-4 py-6 sm:py-8 md:py-10">
         {loading ? (
           <PageLoader />
