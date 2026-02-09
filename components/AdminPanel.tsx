@@ -7,9 +7,9 @@
 import { useState, useMemo, useCallback, type FormEvent } from 'react';
 import type { Party, AdminUser, Result } from '@/types';
 import { divisions, getConstituencyId, getConstituencyName } from '@/data/divisions';
-import { saveResult, getResultByConstituency } from '@/lib/firestore';
+import { saveResult, getResultByConstituency, getConstituencyDocument } from '@/lib/firestore';
 import { formatNumber, formatPercentage } from '@/lib/utils';
-import { getAllSelectableParties, getIndependentOption } from '@/data/parties';
+import { getPartyById } from '@/data/parties';
 
 interface Props {
   parties: Party[];
@@ -20,6 +20,14 @@ interface Props {
 interface VoteInput {
   partyId: string;
   votes: number;
+}
+
+interface CandidateEntry {
+  partyId: string;
+  partyName: string;
+  candidateName: string;
+  symbol: string;
+  color: string;
 }
 
 interface ConstituencyItem {
@@ -55,16 +63,11 @@ function buildConstituencyList(): ConstituencyItem[] {
 const ALL_CONSTITUENCIES = buildConstituencyList();
 
 export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
-  const allParties = useMemo(() => {
-    const selectableParties = getAllSelectableParties();
-    const independent = getIndependentOption();
-    return independent ? [...selectableParties, independent] : selectableParties;
-  }, []);
-
   const [search, setSearch] = useState('');
   const [filterDivision, setFilterDivision] = useState('');
 
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [candidates, setCandidates] = useState<CandidateEntry[]>([]);
   const [voteInputs, setVoteInputs] = useState<VoteInput[]>([]);
   const [status, setStatus] = useState<'partial' | 'completed'>('partial');
   const [saving, setSaving] = useState(false);
@@ -101,6 +104,7 @@ export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
   const selectConstituency = useCallback(async (c: ConstituencyItem) => {
     if (activeId === c.id) {
       setActiveId(null);
+      setCandidates([]);
       setVoteInputs([]);
       setExistingResult(null);
       setMessage(null);
@@ -112,19 +116,64 @@ export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
     setMessage(null);
 
     try {
+      // Fetch raw constituency doc to discover party/candidate entries
+      const rawDoc = await getConstituencyDocument(c.id);
+      const entries: CandidateEntry[] = [];
+
+      if (rawDoc) {
+        for (const [key, value] of Object.entries(rawDoc)) {
+          const staticParty = getPartyById(key);
+
+          if (Array.isArray(value) && value.length > 0) {
+            // Array field — extract first candidate's info
+            const item = value[0];
+            entries.push({
+              partyId: key,
+              partyName: item.partyName || staticParty?.shortName || key,
+              candidateName: item.candidateName || item.name || '',
+              symbol: item.symbol || staticParty?.symbol || '',
+              color: staticParty?.color || '#6B7280',
+            });
+          } else if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+            // Map/object field — candidate data stored directly
+            const obj = value as Record<string, unknown>;
+            entries.push({
+              partyId: key,
+              partyName: (obj.partyName as string) || staticParty?.shortName || key,
+              candidateName: (obj.candidateName as string) || (obj.name as string) || '',
+              symbol: (obj.symbol as string) || staticParty?.symbol || '',
+              color: staticParty?.color || '#6B7280',
+            });
+          } else if (staticParty) {
+            // Primitive value (number/string from reset etc.) — show party from static data
+            entries.push({
+              partyId: key,
+              partyName: staticParty.shortName,
+              candidateName: '',
+              symbol: staticParty.symbol,
+              color: staticParty.color,
+            });
+          }
+        }
+      }
+
+      setCandidates(entries);
+
+      // Fetch existing result for vote counts
       const result = await getResultByConstituency(c.id);
       setExistingResult(result);
-      setVoteInputs(allParties.map(p => ({ partyId: p.id, votes: result?.partyVotes[p.id] || 0 })));
+      setVoteInputs(entries.map(e => ({ partyId: e.partyId, votes: result?.partyVotes[e.partyId] || 0 })));
       if (result?.status) setStatus(result.status as 'partial' | 'completed');
       else setStatus('partial');
     } catch {
-      setVoteInputs(allParties.map(p => ({ partyId: p.id, votes: 0 })));
+      setCandidates([]);
+      setVoteInputs([]);
       setExistingResult(null);
       setStatus('partial');
     } finally {
       setLoadingId(null);
     }
-  }, [activeId, allParties]);
+  }, [activeId]);
 
   const updateVote = (partyId: string, value: string) => {
     const votes = parseInt(value, 10) || 0;
@@ -291,32 +340,39 @@ export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
                             )}
 
                             <div className="divide-y divide-gray-100 dark:divide-slate-800/50">
-                              {allParties.map(party => {
-                                const input = voteInputs.find(v => v.partyId === party.id);
+                              {candidates.length === 0 ? (
+                                <div className="px-5 py-6 text-center text-xs text-gray-400 dark:text-gray-500">
+                                  No candidates found in this constituency.
+                                </div>
+                              ) : candidates.map(candidate => {
+                                const input = voteInputs.find(v => v.partyId === candidate.partyId);
                                 const votes = input?.votes || 0;
                                 const pct = totalVotes > 0 ? (votes / totalVotes) * 100 : 0;
-                                const isLeading = calculated.winnerId === party.id && votes > 0;
+                                const isLeading = calculated.winnerId === candidate.partyId && votes > 0;
 
                                 return (
                                   <div
-                                    key={party.id}
+                                    key={candidate.partyId}
                                     className={`flex items-center gap-3 px-5 py-2.5 ${
                                       isLeading ? 'bg-green-50/50 dark:bg-emerald-900/10' : ''
                                     }`}
                                   >
-                                    <span className="text-base">{party.symbol}</span>
-                                    <span className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: party.color }} />
+                                    <span className="text-base">{candidate.symbol}</span>
+                                    <span className="h-3 w-3 rounded-full flex-shrink-0" style={{ backgroundColor: candidate.color }} />
                                     <div className="flex-1 min-w-0">
                                       <span className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate block">
-                                        {party.shortName}
+                                        {candidate.partyName}
                                         {isLeading && <span className="ml-1.5 text-green-600 dark:text-emerald-400">● Leading</span>}
                                       </span>
+                                      {candidate.candidateName && (
+                                        <span className="text-[11px] text-gray-500 dark:text-gray-400 truncate block">{candidate.candidateName}</span>
+                                      )}
                                     </div>
                                     <input
                                       type="number"
                                       min="0"
                                       value={votes || ''}
-                                      onChange={e => updateVote(party.id, e.target.value)}
+                                      onChange={e => updateVote(candidate.partyId, e.target.value)}
                                       placeholder="0"
                                       className="w-24 rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-2.5 py-1.5 text-right text-xs font-semibold text-gray-900 dark:text-gray-100 outline-none focus:border-bd-green dark:focus:border-emerald-400 focus:ring-1 focus:ring-bd-green/20 transition-all"
                                     />
@@ -332,8 +388,8 @@ export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
                                   Total: <strong className="text-gray-900 dark:text-gray-100">{formatNumber(totalVotes)}</strong>
                                 </span>
                                 <span className="text-gray-500 dark:text-gray-400">
-                                  Winner: <strong style={{ color: allParties.find(p => p.id === calculated.winnerId)?.color }}>
-                                    {allParties.find(p => p.id === calculated.winnerId)?.shortName || '—'}
+                                  Winner: <strong style={{ color: candidates.find(c => c.partyId === calculated.winnerId)?.color }}>
+                                    {candidates.find(c => c.partyId === calculated.winnerId)?.partyName || '—'}
                                   </strong>
                                 </span>
                                 <span className="text-gray-500 dark:text-gray-400">
