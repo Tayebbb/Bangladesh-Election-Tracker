@@ -65,6 +65,14 @@ export async function getConstituencyById(id: string): Promise<Constituency | nu
   return docSnap.exists() ? ({ id: docSnap.id, ...docSnap.data() } as Constituency) : null;
 }
 
+// Get raw constituency document (all fields including party arrays)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function getConstituencyDocument(id: string): Promise<Record<string, any> | null> {
+  const docRef = doc(firestore, COLLECTIONS.CONSTITUENCIES, id);
+  const docSnap = await getDoc(docRef);
+  return docSnap.exists() ? docSnap.data() : null;
+}
+
 export async function getConstituenciesByDistrict(districtId: string): Promise<Constituency[]> {
   const snapshot = await getDocs(
     query(
