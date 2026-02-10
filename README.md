@@ -147,10 +147,25 @@ firebase deploy --only firestore:rules
 
 ### 4. Environment Variables
 
+⚠️ **Security Notice:** Never commit `.env.local` or `.env` files containing your actual Firebase credentials to version control. These files are already included in `.gitignore`.
+
 ```bash
 cp .env.example .env.local
 # Edit .env.local with your Firebase config values
 ```
+
+**Required variables:**
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+
+**For scripts (optional):**
+- `FIREBASE_API_KEY` (same value as NEXT_PUBLIC_FIREBASE_API_KEY)
+- `FIREBASE_PROJECT_ID` (same value as NEXT_PUBLIC_FIREBASE_PROJECT_ID)
+- etc.
 
 ### 5. Run Development
 
