@@ -2,11 +2,17 @@
 
 /* Admin page — protected by Firebase Auth */
 
+import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import AdminLogin from '@/components/AdminLogin';
-import AdminPanel from '@/components/AdminPanel';
 import { PageLoader } from '@/components/LoadingSpinner';
 import { useAuth } from '@/hooks';
+
+// Dynamic import for AdminPanel - only load when authenticated
+const AdminPanel = dynamic(() => import('@/components/AdminPanel'), {
+  loading: () => <PageLoader />,
+  ssr: false
+});
 
 export default function AdminPage() {
   const { adminUser, loading: authLoading, error, login, logout, isAuthenticated } = useAuth();

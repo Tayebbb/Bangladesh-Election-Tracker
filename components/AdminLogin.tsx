@@ -63,6 +63,14 @@ export default function AdminLogin({ onLogin, error, loading }: Props) {
           placeholder="••••••••"
           autoComplete="current-password"
         />
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full rounded-lg bg-gradient-to-r from-bd-green via-emerald-500 to-emerald-600 dark:from-emerald-600 dark:via-emerald-500 dark:to-emerald-400 px-4 py-3 text-sm font-bold text-white shadow-lg hover:from-emerald-600 hover:via-emerald-600 hover:to-emerald-700 dark:hover:from-emerald-500 dark:hover:via-emerald-400 dark:hover:to-emerald-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isLoading ? 'Signing in...' : 'Sign In'}
+        </button>
       </form>
     </div>
   );

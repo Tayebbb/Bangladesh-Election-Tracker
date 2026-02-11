@@ -149,10 +149,18 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
     };
   }, [summary.declaredSeats, winner, sortedAlliances, MAJORITY_SEATS, getWinnerName]);
 
+  const govStatusEmoji = 
+    governmentStatus.status === 'Majority Achieved' ? '🏆' :
+    governmentStatus.status === 'Majority Likely' ? '📈' :
+    governmentStatus.status === 'Hung Parliament' ? '⚖️' :
+    governmentStatus.status === 'Coalition Likely' ? '🤝' :
+    governmentStatus.status === 'Clear Lead' ? '🥇' :
+    governmentStatus.status === 'No Clear Lead' ? '📊' : '⏳';
+
   return (
     <div className="space-y-6 fade-in">
       {/* Key metrics row with gradient cards - 6 columns */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 sm:gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4">
         <MetricCard label="Total Seats" value={TOTAL_SEATS} icon={<ChartBarIcon className="h-6 w-6" />} />
         <MetricCard label="Declared" value={summary.declaredSeats} accent icon={<CheckCircleIcon className="h-6 w-6" />} />
         <MetricCard label="Suspended" value={2} suspended icon={<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>} />
@@ -166,63 +174,13 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
           value={formatPercentage(summary.nationalTurnout)}
           icon={<ArrowTrendingUpIcon className="h-6 w-6" />}
         />
-      </div>
-
-      {/* Government Formation Status Card */}
-      <div className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 shadow-xl border-2 bg-gradient-to-br ${governmentStatus.bgGradient} transition-all duration-500`}
-        style={{ borderColor: governmentStatus.accentColor + '40' }}
-      >
-        {/* Animated background accent */}
-        <div 
-          className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl opacity-10 animate-pulse"
-          style={{ backgroundColor: governmentStatus.accentColor }}
+        <MetricCard
+          label="Government Status"
+          value={govStatusEmoji}
+          customColor={governmentStatus.accentColor}
+          statusLabel={governmentStatus.status}
+          icon={<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
         />
-        
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div 
-                className="w-3 h-3 rounded-full animate-pulse shadow-lg"
-                style={{ backgroundColor: governmentStatus.accentColor }}
-              />
-              <span className="text-xs font-black uppercase tracking-wider text-gray-600 dark:text-gray-400">
-                Government Formation Status
-              </span>
-            </div>
-            <div className="text-4xl animate-bounce">
-              {governmentStatus.status === 'Majority Achieved' ? '🏆' :
-               governmentStatus.status === 'Majority Likely' ? '📈' :
-               governmentStatus.status === 'Hung Parliament' ? '⚖️' :
-               governmentStatus.status === 'Coalition Likely' ? '🤝' :
-               governmentStatus.status === 'Clear Lead' ? '🥇' :
-               governmentStatus.status === 'No Clear Lead' ? '📊' : '⏳'}
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div>
-              <h3 
-                className={`text-3xl sm:text-5xl font-black mb-2 bg-gradient-to-r ${governmentStatus.color} bg-clip-text text-transparent`}
-              >
-                {governmentStatus.status}
-              </h3>
-              <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 font-medium">
-                {governmentStatus.description}
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-4">
-              <div className="text-center px-6 py-4 rounded-xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-                <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
-                  Required
-                </div>
-                <div className="text-3xl font-black" style={{ color: governmentStatus.accentColor }}>
-                  {MAJORITY_SEATS}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Winner Declaration or Leading Alliance Announcement */}
@@ -560,23 +518,54 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
 }
 
 function MetricCard({
-  label, value, accent, suspended, icon,
+  label, value, accent, suspended, icon, customColor, statusLabel,
 }: {
-  label: string; value: string | number; accent?: boolean; suspended?: boolean; icon?: React.ReactNode;
+  label: string; 
+  value: string | number; 
+  accent?: boolean; 
+  suspended?: boolean; 
+  icon?: React.ReactNode;
+  customColor?: string;
+  statusLabel?: string;
 }) {
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-gray-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white via-gray-50/30 to-white dark:from-slate-900 dark:via-slate-900/50 dark:to-slate-900 p-4 sm:p-5 text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+    <div 
+      className="group relative overflow-hidden rounded-2xl border border-gray-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white via-gray-50/30 to-white dark:from-slate-900 dark:via-slate-900/50 dark:to-slate-900 p-4 sm:p-5 text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+      title={statusLabel}
+    >
       {/* Subtle gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-100/20 dark:to-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity" />
       
       <div className="relative">
         {icon && (
-          <div className={`flex justify-center mb-3 transition-all ${suspended ? 'text-red-500 dark:text-red-400 group-hover:text-red-600 dark:group-hover:text-red-300' : 'text-gray-600 dark:text-gray-400 group-hover:text-bd-green dark:group-hover:text-emerald-400'} group-hover:scale-110`}>
+          <div 
+            className={`flex justify-center mb-3 transition-all ${
+              suspended 
+                ? 'text-red-500 dark:text-red-400 group-hover:text-red-600 dark:group-hover:text-red-300' 
+                : customColor 
+                ? 'group-hover:scale-110' 
+                : 'text-gray-600 dark:text-gray-400 group-hover:text-bd-green dark:group-hover:text-emerald-400'
+            } group-hover:scale-110`}
+            style={customColor ? { color: customColor } : {}}
+          >
             {icon}
           </div>
         )}
         <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">{label}</p>
-        <p className={`text-xl sm:text-3xl font-black mt-2 ${accent ? 'text-bd-green dark:text-emerald-400' : suspended ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-100'}`}>{value}</p>
+        <p 
+          className={`text-xl sm:text-3xl font-black mt-2 ${
+            accent 
+              ? 'text-bd-green dark:text-emerald-400' 
+              : suspended 
+              ? 'text-red-600 dark:text-red-400' 
+              : customColor 
+              ? '' 
+              : 'text-gray-900 dark:text-gray-100'
+          }`}
+          style={customColor ? { color: customColor } : {}}
+        >
+          {value}
+        </p>
       </div>
     </div>
   );

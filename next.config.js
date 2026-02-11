@@ -17,8 +17,24 @@ const nextConfig = {
 
   // PERF: Enable experimental optimizations
   experimental: {
-    optimizePackageImports: ['@heroicons/react'],
+    optimizePackageImports: ['@heroicons/react', 'firebase', 'firebase/firestore', 'firebase/auth'],
   },
+
+  // PERF: Optimize webpack for faster builds and smaller bundles
+  webpack: (config, { isServer }) => {
+    // Optimize for production builds
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        usedExports: true,
+        sideEffects: false,
+      };
+    }
+    return config;
+  },
+
+  // PERF: Output standalone for better deployment performance
+  output: 'standalone',
 
   // SECURITY + PERF: Comprehensive headers
   async headers() {

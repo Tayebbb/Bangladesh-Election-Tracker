@@ -1,6 +1,16 @@
 import type { Metadata, Viewport } from 'next';
+import { Inter } from 'next/font/google';
 import Script from 'next/script';
 import './globals.css';
+
+// PERF: Optimize font loading with next/font
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+  preload: true,
+  fallback: ['system-ui', 'arial'],
+});
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -38,18 +48,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={inter.variable}>
       <head>
-        {/* PERF: Preconnect to Google Fonts for faster loading */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-        {/* PERF: Leaflet CSS removed from global — only loaded on map page (lazy) */}
+        {/* PERF: DNS prefetch for external resources */}
+        <link rel="dns-prefetch" href="https://firestore.googleapis.com" />
+        <link rel="dns-prefetch" href="https://firebase.googleapis.com" />
+        <link rel="preconnect" href="https://firestore.googleapis.com" crossOrigin="anonymous" />
       </head>
-      <body className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-200">
+      <body className="min-h-screen bg-white dark:bg-slate-950 transition-colors duration-200 font-sans antialiased">
         {children}
         {/* PERF: Load analytics script lazily after page interactive */}
         <Script

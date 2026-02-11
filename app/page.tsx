@@ -4,15 +4,26 @@
    popular vote percentages, and a constituency list. */
 
 import { useEffect, useState, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import ElectionBanner from '@/components/ElectionBanner';
 import Footer from '@/components/Footer';
-import ResultsSummary from '@/components/ResultsSummary';
-import ConstituencyList from '@/components/ConstituencyList';
+import { PageLoader } from '@/components/LoadingSpinner';
 import { useParties, useResults, useSummary } from '@/hooks';
 import { getConstituencies } from '@/lib/firestore';
 import { aggregateAllianceSeatCounts } from '@/lib/alliances';
 import type { Constituency, SeatCount } from '@/types';
+
+// Dynamic imports for heavy components to reduce initial bundle size
+const ResultsSummary = dynamic(() => import('@/components/ResultsSummary'), {
+  loading: () => <PageLoader />,
+  ssr: false
+});
+
+const ConstituencyList = dynamic(() => import('@/components/ConstituencyList'), {
+  loading: () => <PageLoader />,
+  ssr: false
+});
 
 export default function HomePage() {
   const { parties, loading: pLoading } = useParties();
