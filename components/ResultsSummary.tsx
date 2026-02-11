@@ -170,64 +170,41 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
 
       {/* Government Formation Status Card */}
       <section 
-        className={`relative overflow-hidden rounded-2xl border-2 shadow-xl p-6 sm:p-8 bg-gradient-to-br ${governmentStatus.bgGradient} transition-all duration-500`}
+        className="group relative overflow-hidden rounded-2xl border border-gray-200/50 dark:border-slate-700/50 bg-gradient-to-br from-white via-gray-50/30 to-white dark:from-slate-900 dark:via-slate-900/50 dark:to-slate-900 p-4 sm:p-5 text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
         aria-label="Government formation status"
       >
-        {/* Background decoration */}
-        <div 
-          className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-2xl"
-          style={{ backgroundColor: governmentStatus.accentColor }}
-          aria-hidden="true"
-        />
+        {/* Subtle gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-gray-100/20 dark:to-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity" />
         
         <div className="relative">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            {/* Left: Status Info */}
-            <div className="flex-1 min-w-[200px]">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl" role="img" aria-label="Government status indicator">🥇</span>
-                <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
-                  Government Status
-                </h3>
-              </div>
-              <div className={`text-2xl sm:text-4xl font-black bg-gradient-to-r ${governmentStatus.color} bg-clip-text text-transparent mb-1`}>
-                {governmentStatus.status}
-              </div>
-              <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 font-medium">
-                {governmentStatus.description}
-              </p>
-            </div>
-
-            {/* Right: Seat Progress */}
-            {sortedAlliances.length > 0 && summary.declaredSeats > 0 && (
-              <div className="flex-shrink-0">
-                <div className="text-right">
-                  <div className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase tracking-wide mb-1">
-                    Majority Line
-                  </div>
-                  <div className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white">
-                    {MAJORITY_SEATS}
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    of {TOTAL_SEATS} seats
-                  </div>
-                </div>
-              </div>
-            )}
+          {/* Icon and Label */}
+          <div className="flex justify-center mb-3 transition-all text-gray-600 dark:text-gray-400 group-hover:text-bd-green dark:group-hover:text-emerald-400 group-hover:scale-110">
+            <span className="text-2xl" role="img" aria-label="Government status indicator">🥇</span>
           </div>
+          <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">Government Status</p>
+          
+          {/* Status Value */}
+          <div className={`text-xl sm:text-3xl font-black mt-2 bg-gradient-to-r ${governmentStatus.color} bg-clip-text text-transparent`}>
+            {governmentStatus.status}
+          </div>
+          
+          {/* Description */}
+          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-2 font-medium">
+            {governmentStatus.description}
+          </p>
 
           {/* Progress indicator for leading alliance */}
           {sortedAlliances.length > 0 && sortedAlliances[0] && summary.declaredSeats > 0 && (
-            <div className="mt-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            <div className="mt-4">
+              <div className="flex justify-between items-center mb-2 text-xs">
+                <span className="font-semibold text-gray-600 dark:text-gray-400">
                   {sortedAlliances[0].allianceName}
                 </span>
-                <span className="text-sm font-bold text-gray-900 dark:text-white">
+                <span className="font-bold text-gray-700 dark:text-gray-300">
                   {sortedAlliances[0].seats} / {MAJORITY_SEATS}
                 </span>
               </div>
-              <div className="h-3 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div 
                   className="h-full rounded-full transition-all duration-1000 ease-out"
                   style={{ 
