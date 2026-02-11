@@ -154,7 +154,7 @@ function ConstituencyListInner({ results, parties, constituencies, enablePaginat
       {/* Filters with modern design */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-2 overflow-x-auto py-1 px-1 scrollbar-hide">
-          {(['all', 'completed', 'partial', 'pending'] as const).map((s) => (
+          {(['all', 'completed', 'pending'] as const).map((s) => (
             <button
               key={s}
               onClick={() => handleStatusFilter(s)}

@@ -34,7 +34,6 @@ export default function Header() {
         <nav className="hidden absolute left-1/2 -translate-x-1/2 items-center gap-2 md:flex bg-white/90 dark:bg-slate-800/90 rounded-full px-2 py-1.5 shadow-md border border-gray-200/70 dark:border-slate-700/70 backdrop-blur-lg">
           <NavLink href="/">Dashboard</NavLink>
           <NavLink href="/constituency">Constituency</NavLink>
-          <NavLink href="/admin9012">Admin</NavLink>
         </nav>
 
         {/* Live indicator + Theme toggle + Mobile menu */}
@@ -71,7 +70,6 @@ export default function Header() {
         <nav className="border-t border-gray-100 dark:border-slate-700/50 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-4 py-4 md:hidden space-y-1.5 shadow-lg">
           <NavLink href="/" onClick={() => setMenuOpen(false)} mobile>Dashboard</NavLink>
           <NavLink href="/constituency" onClick={() => setMenuOpen(false)} mobile>Constituency</NavLink>
-          <NavLink href="/admin9012" onClick={() => setMenuOpen(false)} mobile>Admin</NavLink>
         </nav>
       )}
     </header>

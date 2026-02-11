@@ -26,7 +26,6 @@ const nextConfig = {
     if (!isServer) {
       config.optimization = {
         ...config.optimization,
-        usedExports: true,
         sideEffects: false,
       };
     }
