@@ -72,6 +72,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
         status: 'No Results Yet',
         color: 'from-gray-500 to-gray-600',
         bgGradient: 'from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900',
+        accentColor: '#6B7280',
         description: 'Results pending',
       };
     }
@@ -82,6 +83,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
         status: 'Majority Achieved',
         color: 'from-green-500 to-emerald-600',
         bgGradient: 'from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/30',
+        accentColor: '#10B981',
         description: `${getWinnerName()} secured majority`,
       };
     }
@@ -94,6 +96,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
         status: 'No Clear Lead',
         color: 'from-gray-500 to-gray-600',
         bgGradient: 'from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900',
+        accentColor: '#6B7280',
         description: 'Results developing',
       };
     }
@@ -109,6 +112,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
         status: 'Majority Likely',
         color: 'from-blue-500 to-indigo-600',
         bgGradient: 'from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30',
+        accentColor: '#3B82F6',
         description: `${leader.allianceName} needs ${seatsToMajority} more`,
       };
     }
@@ -119,6 +123,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
         status: 'Clear Lead',
         color: 'from-blue-500 to-cyan-600',
         bgGradient: 'from-blue-50 to-cyan-100 dark:from-blue-900/20 dark:to-cyan-900/30',
+        accentColor: '#06B6D4',
         description: `${leader.allianceName} leading`,
       };
     }
@@ -129,6 +134,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
         status: 'Hung Parliament',
         color: 'from-amber-500 to-orange-600',
         bgGradient: 'from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/30',
+        accentColor: '#F59E0B',
         description: 'Too close to call',
       };
     }
@@ -138,6 +144,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
       status: 'Coalition Likely',
       color: 'from-purple-500 to-pink-600',
       bgGradient: 'from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/30',
+      accentColor: '#A855F7',
       description: 'No single majority in sight',
     };
   }, [summary.declaredSeats, winner, sortedAlliances, MAJORITY_SEATS, getWinnerName]);
@@ -162,16 +169,23 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
       </div>
 
       {/* Government Formation Status Card */}
-      <div className={`relative overflow-hidden rounded-2xl border-2 shadow-xl p-6 sm:p-8 bg-gradient-to-br ${governmentStatus.bgGradient} transition-all duration-500`}>
+      <section 
+        className={`relative overflow-hidden rounded-2xl border-2 shadow-xl p-6 sm:p-8 bg-gradient-to-br ${governmentStatus.bgGradient} transition-all duration-500`}
+        aria-label="Government formation status"
+      >
         {/* Background decoration */}
-        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-2xl bg-gradient-to-br" style={{ background: `linear-gradient(to bottom right, ${governmentStatus.color.split(' ')[0].replace('from-', '')}, ${governmentStatus.color.split(' ')[1].replace('to-', '')})` }} />
+        <div 
+          className="absolute -top-10 -right-10 w-40 h-40 rounded-full opacity-20 blur-2xl"
+          style={{ backgroundColor: governmentStatus.accentColor }}
+          aria-hidden="true"
+        />
         
         <div className="relative">
           <div className="flex items-center justify-between flex-wrap gap-4">
             {/* Left: Status Info */}
             <div className="flex-1 min-w-[200px]">
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-2xl">🥇</span>
+                <span className="text-2xl" role="img" aria-label="Government status indicator">🥇</span>
                 <h3 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-gray-600 dark:text-gray-400">
                   Government Status
                 </h3>
@@ -225,7 +239,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
             </div>
           )}
         </div>
-      </div>
+      </section>
 
       {/* Winner Declaration or Leading Alliance Announcement */}
       {sortedAlliances.length > 0 && summary.declaredSeats > 0 && (
