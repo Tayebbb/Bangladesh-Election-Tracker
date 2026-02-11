@@ -173,18 +173,70 @@ Open [http://localhost:3000](http://localhost:3000)
 
 ## Deployment
 
-### Vercel
+### Vercel (Recommended)
 
-1. Push to GitHub
-2. Import in [Vercel](https://vercel.com)
-3. Add all `NEXT_PUBLIC_*` env vars from `.env.example`
-4. Deploy
+#### Step 1: Push to GitHub
+
+```bash
+git add .
+git commit -m "Initial commit"
+git push origin main
+```
+
+#### Step 2: Import to Vercel
+
+1. Go to [Vercel](https://vercel.com) and sign in
+2. Click "Add New Project"
+3. Import your GitHub repository
+4. Configure project:
+   - **Framework Preset**: Next.js (auto-detected)
+   - **Root Directory**: ./
+   - **Build Command**: `npm run build` (default)
+   - **Output Directory**: `.next` (default)
+
+#### Step 3: Add Environment Variables
+
+In Vercel project settings → Environment Variables, add all variables from `.env.example`:
+
+```bash
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+NEXT_PUBLIC_CF_ANALYTICS_TOKEN=your_cloudflare_beacon_token
+```
+
+**Important**: Make sure to add these variables for **Production**, **Preview**, and **Development** environments.
+
+#### Step 4: Deploy
+
+1. Click "Deploy"
+2. Wait for build to complete (~2-3 minutes)
+3. Visit your production URL (e.g., `your-app.vercel.app`)
+
+#### Vercel Configuration
+
+The project includes `vercel.json` with:
+
+- **Region**: Singapore (sin1) for Bangladesh users
+- **Cache Headers**: Long-term caching for static assets
+- **Security Headers**: CSP, HSTS, X-Frame-Options, etc.
+- **Framework**: Next.js auto-optimization
+
+#### Continuous Deployment
+
+Vercel automatically deploys:
+
+- **Production**: Every push to `main` branch
+- **Preview**: Every push to other branches (pull requests)
 
 ### Cloudflare Analytics
 
 1. Go to [Cloudflare Web Analytics](https://dash.cloudflare.com/?to=/:account/web-analytics)
 2. Add your domain → get beacon token
-3. Update token in `app/layout.tsx` or set `NEXT_PUBLIC_CF_ANALYTICS_TOKEN`
+3. Add `NEXT_PUBLIC_CF_ANALYTICS_TOKEN` to Vercel environment variables
 
 ## Project Structure
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { ChartBarIcon, CheckCircleIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline';
 import type { ElectionSummary, SeatCount, AllianceSeatCount } from '@/types';
@@ -42,16 +42,16 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
   }, [sortedAlliances, seatCounts, MAJORITY_SEATS]);
 
   // Helper function to get color from winner data
-  const getWinnerColor = () => {
+  const getWinnerColor = useCallback(() => {
     if (!winner) return sortedAlliances[0]?.allianceColor;
     return winner.type === 'alliance' ? winner.data.allianceColor : winner.data.partyColor;
-  };
+  }, [winner, sortedAlliances]);
 
   // Helper function to get name from winner data
-  const getWinnerName = () => {
+  const getWinnerName = useCallback(() => {
     if (!winner) return sortedAlliances[0]?.allianceName;
     return winner.type === 'alliance' ? winner.data.allianceName : winner.data.partyName;
-  };
+  }, [winner, sortedAlliances]);
 
   const toggleAllianceExpanded = (allianceId: string) => {
     setExpandedAlliances(prev => {
@@ -65,10 +65,94 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
     });
   };
 
+  // Calculate government formation status
+  const governmentStatus = useMemo(() => {
+    if (summary.declaredSeats === 0) {
+      return {
+        status: 'No Results Yet',
+        color: 'from-gray-500 to-gray-600',
+        bgGradient: 'from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900',
+        accentColor: '#6B7280',
+        description: 'Results pending',
+      };
+    }
+
+    // Check if any alliance/party has majority
+    if (winner) {
+      return {
+        status: 'Majority Achieved',
+        color: 'from-green-500 to-emerald-600',
+        bgGradient: 'from-green-50 to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/30',
+        accentColor: '#10B981',
+        description: `${getWinnerName()} secured majority`,
+      };
+    }
+
+    // Get top two contenders
+    const top2 = sortedAlliances.slice(0, 2);
+    
+    if (top2.length === 0) {
+      return {
+        status: 'No Clear Lead',
+        color: 'from-gray-500 to-gray-600',
+        bgGradient: 'from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-900',
+        accentColor: '#6B7280',
+        description: 'Results developing',
+      };
+    }
+
+    const leader = top2[0];
+    const runnerUp = top2[1];
+    const seatGap = leader.seats - (runnerUp?.seats || 0);
+    const seatsToMajority = MAJORITY_SEATS - leader.seats;
+
+    // If leader is very close to majority (within 20 seats) and has decent lead
+    if (seatsToMajority <= 20 && seatsToMajority > 0 && seatGap > 15) {
+      return {
+        status: 'Majority Likely',
+        color: 'from-blue-500 to-indigo-600',
+        bgGradient: 'from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30',
+        accentColor: '#3B82F6',
+        description: `${leader.allianceName} needs ${seatsToMajority} more`,
+      };
+    }
+
+    // If there's a clear leader but still far from majority
+    if (seatGap > 20) {
+      return {
+        status: 'Clear Lead',
+        color: 'from-blue-500 to-cyan-600',
+        bgGradient: 'from-blue-50 to-cyan-100 dark:from-blue-900/20 dark:to-cyan-900/30',
+        accentColor: '#06B6D4',
+        description: `${leader.allianceName} leading`,
+      };
+    }
+
+    // If it's very close between top contenders
+    if (seatGap <= 10 && leader.seats > 20) {
+      return {
+        status: 'Hung Parliament',
+        color: 'from-amber-500 to-orange-600',
+        bgGradient: 'from-amber-50 to-orange-100 dark:from-amber-900/20 dark:to-orange-900/30',
+        accentColor: '#F59E0B',
+        description: 'Too close to call',
+      };
+    }
+
+    // Default: Coalition scenario
+    return {
+      status: 'Coalition Likely',
+      color: 'from-purple-500 to-pink-600',
+      bgGradient: 'from-purple-50 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/30',
+      accentColor: '#A855F7',
+      description: 'No single majority in sight',
+    };
+  }, [summary.declaredSeats, winner, sortedAlliances, MAJORITY_SEATS, getWinnerName]);
+
   return (
     <div className="space-y-6 fade-in">
-      {/* Key metrics row with gradient cards */}
-      <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-5">
+      {/* Key metrics row with gradient cards - 6 columns */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 sm:gap-4">
         <MetricCard label="Total Seats" value={TOTAL_SEATS} icon={<ChartBarIcon className="h-6 w-6" />} />
         <MetricCard label="Declared" value={summary.declaredSeats} accent icon={<CheckCircleIcon className="h-6 w-6" />} />
         <MetricCard label="Suspended" value={2} suspended icon={<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>} />
@@ -82,6 +166,63 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
           value={formatPercentage(summary.nationalTurnout)}
           icon={<ArrowTrendingUpIcon className="h-6 w-6" />}
         />
+      </div>
+
+      {/* Government Formation Status Card */}
+      <div className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 shadow-xl border-2 bg-gradient-to-br ${governmentStatus.bgGradient} transition-all duration-500`}
+        style={{ borderColor: governmentStatus.accentColor + '40' }}
+      >
+        {/* Animated background accent */}
+        <div 
+          className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl opacity-10 animate-pulse"
+          style={{ backgroundColor: governmentStatus.accentColor }}
+        />
+        
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-3 h-3 rounded-full animate-pulse shadow-lg"
+                style={{ backgroundColor: governmentStatus.accentColor }}
+              />
+              <span className="text-xs font-black uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                Government Formation Status
+              </span>
+            </div>
+            <div className="text-4xl animate-bounce">
+              {governmentStatus.status === 'Majority Achieved' ? '🏆' :
+               governmentStatus.status === 'Majority Likely' ? '📈' :
+               governmentStatus.status === 'Hung Parliament' ? '⚖️' :
+               governmentStatus.status === 'Coalition Likely' ? '🤝' :
+               governmentStatus.status === 'Clear Lead' ? '🥇' :
+               governmentStatus.status === 'No Clear Lead' ? '📊' : '⏳'}
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+              <h3 
+                className={`text-3xl sm:text-5xl font-black mb-2 bg-gradient-to-r ${governmentStatus.color} bg-clip-text text-transparent`}
+              >
+                {governmentStatus.status}
+              </h3>
+              <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 font-medium">
+                {governmentStatus.description}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="text-center px-6 py-4 rounded-xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+                <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                  Required
+                </div>
+                <div className="text-3xl font-black" style={{ color: governmentStatus.accentColor }}>
+                  {MAJORITY_SEATS}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Winner Declaration or Leading Alliance Announcement */}

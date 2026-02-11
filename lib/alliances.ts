@@ -4,7 +4,7 @@
  */
 
 import type { PartyVotes, AllianceVotes, AllianceSeatCount, SeatCount, Result } from '@/types';
-import { parties, alliances, getPartyById } from '@/data/parties';
+import { alliances, getPartyById } from '@/data/parties';
 
 /**
  * Calculate alliance votes from party votes

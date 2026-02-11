@@ -7,10 +7,8 @@ import {
   getDoc,
   getDocs,
   setDoc,
-  updateDoc,
   onSnapshot,
   query,
-  where,
   orderBy,
   Unsubscribe,
   writeBatch,
@@ -164,7 +162,7 @@ export async function getConstituencyById(id: string): Promise<Constituency | nu
   
   // Build constituency from divisions data structure
   // Firebase documents are only for candidates, not constituency existence
-  const { districtId, number } = parseConstituencyId(normalizedId);
+  const { districtId } = parseConstituencyId(normalizedId);
   const info = DISTRICT_MAP.get(districtId);
   
   // Only return null if the district doesn't exist in our data

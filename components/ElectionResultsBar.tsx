@@ -54,9 +54,9 @@ export default function ElectionResultsBar({
 
         {/* Mobile Layout: Stacked */}
         <div className="sm:hidden space-y-6 mb-8">
-          <PartyColumn party={left} alignment="center" mobile />
+          <PartyColumn party={left} alignment="center" />
           <div className="border-t border-gray-200 dark:border-gray-600 pt-6">
-            <PartyColumn party={right} alignment="center" mobile />
+            <PartyColumn party={right} alignment="center" />
           </div>
         </div>
 
@@ -132,12 +132,10 @@ export default function ElectionResultsBar({
 
 function PartyColumn({ 
   party, 
-  alignment, 
-  mobile = false 
+  alignment
 }: { 
   party: PartyResults; 
-  alignment: 'left' | 'right' | 'center'; 
-  mobile?: boolean;
+  alignment: 'left' | 'right' | 'center';
 }) {
   const textAlign = alignment === 'center' ? 'text-center' : 
                    alignment === 'left' ? 'text-left sm:text-left' : 'text-left sm:text-right';

@@ -81,7 +81,7 @@ export default function EditArticlePage({ params }: Props) {
       setSaving(true);
       setError(null);
       
-      await updateNews(params.id, formData, user.uid);
+      await updateNews(params.id, formData);
       router.push('/admin/news');
     } catch (error) {
       console.error('Failed to update article:', error);

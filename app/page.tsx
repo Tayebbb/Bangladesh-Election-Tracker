@@ -12,7 +12,6 @@ import ConstituencyList from '@/components/ConstituencyList';
 import { useParties, useResults, useSummary } from '@/hooks';
 import { getConstituencies } from '@/lib/firestore';
 import { aggregateAllianceSeatCounts } from '@/lib/alliances';
-import { ELECTION_CONFIG } from '@/lib/constants';
 import type { Constituency, SeatCount } from '@/types';
 
 export default function HomePage() {

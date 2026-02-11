@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { getPublishedNews } from '@/lib/news';
-import { formatDate } from '@/lib/utils';
 import NewsCard from './NewsCard';
 import type { NewsArticle } from '@/types';
 
