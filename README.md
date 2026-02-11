@@ -32,17 +32,6 @@ Built with Next.js 14, Firebase, TypeScript, and Tailwind CSS — optimized for 
 - **Victory Margin & Turnout** statistics
 - **Alliance Context** display (e.g., "BNP (BNP Alliance)")
 
-### 👮 Admin Panel
-
-- **Secure Hidden Route** (`/admin9012`) with Firebase authentication
-- **3-tier Cascade Selector** - Division → District → Constituency
-- **All 60+ Parties** available for vote entry
-- **Independent Candidate** option
-- **MCQ-style Vote Entry** with real-time calculations
-- **Edit Existing Results** with overwrite warning
-- **Toggle Status** - Partial/Completed
-- **Auto-calculation** - Total votes, winner, margin, percentages
-
 ### 🎨 UI/UX Features
 
 - **Dark Mode Support** with system preference detection
@@ -55,11 +44,9 @@ Built with Next.js 14, Firebase, TypeScript, and Tailwind CSS — optimized for 
 
 ### 📰 News System
 
-- **Admin News Management** - Create, edit, publish news articles
 - **Slug-based URLs** - SEO-friendly article links (/news/article-slug)
 - **Markdown Support** - Bold/italic formatting in articles
 - **XSS Protection** - Content sanitization prevents script injection
-- **Draft/Published Status** - Content workflow management
 - **Responsive Article Layout** - Mobile-optimized reading experience
 
 ### ⚡ Performance & Technical
@@ -75,15 +62,11 @@ Built with Next.js 14, Firebase, TypeScript, and Tailwind CSS — optimized for 
 
 ### 🔐 Security & Hardening
 
-- **Firebase Authentication** with email/password and admin verification
 - **Firestore Security Rules** with field-level validation (vote counts, status enums)
 - **Content Security Policy (CSP)** - Prevents XSS attacks
 - **HTTP Security Headers** - HSTS, X-Frame-Options, X-Content-Type-Options
 - **Input Validation & Sanitization** - Vote count validation (0-10M), HTML stripping
-- **Rate Limiting** - Admin actions limited to 10 requests per minute
 - **XSS Prevention** - News content sanitized, script tags stripped
-- **Role-based Access Control** - admin/data-entry permissions
-- **Audit Trail** - All changes tracked with user ID and timestamp
 
 ### 📊 Data Management
 
@@ -129,30 +112,14 @@ firebase login
 firebase deploy --only firestore:rules
 ```
 
-**Note:** The admin panel is accessible only via the secret URL `/admin9012` (not visible in navigation).
-
-### 3. Create Admin User
-
-1. In Firebase Auth console, create a user (email + password)
-2. Note the user UID
-3. In Firestore, create document: `adminUsers/{uid}`
-   ```json
-   {
-     "email": "admin@example.com",
-     "displayName": "Admin",
-     "role": "admin",
-     "createdAt": "2026-01-01T00:00:00Z"
-   }
-   ```
-
-### 4. Environment Variables
+### 3. Environment Variables
 
 ```bash
 cp .env.example .env.local
 # Edit .env.local with your Firebase config values
 ```
 
-### 5. Run Development
+### 4. Run Development
 
 ```bash
 npm run dev
@@ -166,8 +133,6 @@ Open [http://localhost:3000](http://localhost:3000)
 - `/map` — Full map (currently disabled)
 - `/news` — News articles listing
 - `/news/[slug]` — Individual article pages
-- `/admin/news` — News management (admin only)
-- `/admin9012` — Result entry panel (hidden from navigation)
 - `/constituency` — Constituency list with search/filters
 - `/constituency/[id]` — Detailed constituency results
 
@@ -249,9 +214,6 @@ app/
   news/
     page.tsx            → News articles listing
     [slug]/page.tsx     → Individual article with XSS protection
-  admin/
-    news/               → News management interface
-  admin9012/page.tsx    → Result entry panel (secret route)
   map/page.tsx          → Interactive map (currently disabled)
   layout.tsx            → Root layout with security headers
   globals.css           → Global styles
@@ -266,8 +228,6 @@ components/
   ConstituencyList.tsx  → Virtualized list with infinite scroll
   NewsCard.tsx          → Article preview cards
   NewsGrid.tsx          → Responsive article grid
-  AdminLogin.tsx        → Secure auth form
-  AdminPanel.tsx        → Vote entry with validation & rate limiting
   MapView.tsx           → Leaflet map (disabled)
   LoadingSpinner.tsx    → Loading states
   Footer.tsx            → Site footer
@@ -275,7 +235,6 @@ components/
 lib/
   firebase.ts           → Firebase init (singleton)
   firestore.ts          → Firestore CRUD + real-time listeners (optimized)
-  auth.ts               → Authentication helpers
   news.ts               → News article operations
   validation.ts         → Input validation & XSS sanitization
   alliances.ts          → Party alliance calculations
@@ -283,7 +242,6 @@ lib/
   utils.ts              → Formatting & utility functions
 
 hooks/
-  useAuth.ts            → Auth state hook
   useElectionData.ts    → Real-time data hooks
 
 data/
@@ -305,7 +263,6 @@ public/data/geojson/    → Map boundary + district data
 | `results`        | Vote tallies with field validation       |
 | `summary`        | Real-time aggregated metrics             |
 | `news`           | Articles with draft/published status     |
-| `adminUsers`     | Role-based access control                |
 
 ## GeoJSON
 
@@ -327,7 +284,6 @@ Recommended source: [GADM](https://gadm.org/download_country.html) or Bangladesh
 
 - **Content Security Policy**: Strict CSP prevents XSS injection attacks
 - **Input Validation**: Vote counts validated (0-10M range), HTML tags stripped
-- **Rate Limiting**: Admin actions limited to prevent abuse (10 req/min)
 - **XSS Prevention**: News content sanitized, dangerous elements removed
 - **Security Headers**: HSTS, X-Frame-Options, X-Content-Type-Options, Permissions-Policy
 - **Firestore Rules**: Field-level validation on writes (types, ranges, auth checks)
