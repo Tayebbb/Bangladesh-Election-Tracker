@@ -38,8 +38,8 @@ const ConstituencyList = dynamic(() => import('@/components/ConstituencyList'), 
 });
 
 export default function HomePage() {
-  const { parties, loading: pLoading } = useParties();
-  const { results, loading: rLoading } = useResults();
+  const { parties } = useParties();
+  const { results } = useResults();
   const { summary } = useSummary(results);
   const [constituencies, setConstituencies] = useState<Constituency[]>([]);
   const [cLoading, setCLoading] = useState(false);
