@@ -149,13 +149,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
     };
   }, [summary.declaredSeats, winner, sortedAlliances, MAJORITY_SEATS, getWinnerName]);
 
-  const govStatusEmoji = 
-    governmentStatus.status === 'Majority Achieved' ? '🏆' :
-    governmentStatus.status === 'Majority Likely' ? '📈' :
-    governmentStatus.status === 'Hung Parliament' ? '⚖️' :
-    governmentStatus.status === 'Coalition Likely' ? '🤝' :
-    governmentStatus.status === 'Clear Lead' ? '🥇' :
-    governmentStatus.status === 'No Clear Lead' ? '📊' : '⏳';
+  // Government status - using text instead of emoji per user request
 
   return (
     <div className="space-y-6 fade-in">
@@ -176,7 +170,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
         />
         <MetricCard
           label="Government Status"
-          value={govStatusEmoji}
+          value={governmentStatus.status}
           customColor={governmentStatus.accentColor}
           statusLabel={governmentStatus.status}
           icon={<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
@@ -553,7 +547,7 @@ function MetricCard({
         )}
         <p className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">{label}</p>
         <p 
-          className={`text-xl sm:text-3xl font-black mt-2 ${
+          className={`text-lg sm:text-2xl xl:text-3xl font-black mt-2 leading-tight break-words ${
             accent 
               ? 'text-bd-green dark:text-emerald-400' 
               : suspended 
