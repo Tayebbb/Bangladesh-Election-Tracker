@@ -10,8 +10,9 @@ import { useParties, useResults, useSummary } from '@/hooks';
 import { getConstituencies } from '@/lib/firestore';
 import { aggregateAllianceSeatCounts } from '@/lib/alliances';
 import type { Constituency, SeatCount } from '@/types';
+import ResultsSummary from '@/components/ResultsSummary';
 
-// Dynamic imports for ALL non-critical components to reduce initial bundle size
+// Dynamic imports for non-critical components only
 const Header = dynamic(() => import('@/components/Header'), {
   ssr: true
 });
@@ -21,16 +22,6 @@ const ElectionBanner = dynamic(() => import('@/components/ElectionBanner'), {
 });
 
 const Footer = dynamic(() => import('@/components/Footer'), {
-  ssr: false
-});
-
-const ResultsSummary = dynamic(() => import('@/components/ResultsSummary'), {
-  loading: () => (
-    <div className="animate-pulse space-y-4">
-      <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
-      <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-    </div>
-  ),
   ssr: false
 });
 
@@ -116,26 +107,14 @@ export default function HomePage() {
 
   const allianceSeatCounts = useMemo(() => aggregateAllianceSeatCounts(results), [results]);
 
-  // PERF: Progressive loading - show page immediately, load data in background
-  // Don't block the entire page on loading state
-  const showSkeleton = (pLoading || rLoading) && results.length === 0;
-
   return (
     <>
       <Header />
       <ElectionBanner />
       <main className="mx-auto max-w-7xl px-3 sm:px-4 py-6 sm:py-8 md:py-10">
         <div className="space-y-8">
-          {/* PERF: Show results summary immediately when data is ready */}
-          {showSkeleton ? (
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
-              <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-              <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            </div>
-          ) : (
-            <ResultsSummary summary={summary} seatCounts={seatCounts} allianceSeatCounts={allianceSeatCounts} />
-          )}
+          {/* Results summary loads instantly and updates with data as it arrives */}
+          <ResultsSummary summary={summary} seatCounts={seatCounts} allianceSeatCounts={allianceSeatCounts} />
 
           {/* PERF: Lazy-loaded constituency section with intersection observer */}
           <section ref={constituencyRef}>
@@ -153,7 +132,7 @@ export default function HomePage() {
               <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-8 text-center">
                 <p className="text-sm text-gray-500 dark:text-gray-400">Scroll down to load constituencies...</p>
               </div>
-            ) : cLoading || showSkeleton ? (
+            ) : cLoading ? (
               <div className="flex items-center justify-center py-10">
                 <div className="inline-block h-6 w-6 animate-spin rounded-full border-3 border-solid border-bd-green border-r-transparent" />
               </div>
