@@ -66,8 +66,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
   };
 
   // Calculate government formation status
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _governmentStatus = useMemo(() => {
+  const governmentStatus = useMemo(() => {
     if (summary.declaredSeats === 0) {
       return {
         status: 'No Results Yet',
@@ -153,7 +152,7 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
   return (
     <div className="space-y-6 fade-in">
       {/* Key metrics row with gradient cards - 6 columns */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6 sm:gap-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 sm:gap-4">
         <MetricCard label="Total Seats" value={TOTAL_SEATS} icon={<ChartBarIcon className="h-6 w-6" />} />
         <MetricCard label="Declared" value={summary.declaredSeats} accent icon={<CheckCircleIcon className="h-6 w-6" />} />
         <MetricCard label="Suspended" value={2} suspended icon={<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>} />
@@ -167,11 +166,63 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
           value={formatPercentage(summary.nationalTurnout)}
           icon={<ArrowTrendingUpIcon className="h-6 w-6" />}
         />
-        <MetricCard
-          label="Government Status"
-          value="🥇"
-          icon={<svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
+      </div>
+
+      {/* Government Formation Status Card */}
+      <div className={`relative overflow-hidden rounded-2xl p-6 sm:p-8 shadow-xl border-2 bg-gradient-to-br ${governmentStatus.bgGradient} transition-all duration-500`}
+        style={{ borderColor: governmentStatus.accentColor + '40' }}
+      >
+        {/* Animated background accent */}
+        <div 
+          className="absolute -top-32 -right-32 w-80 h-80 rounded-full blur-3xl opacity-10 animate-pulse"
+          style={{ backgroundColor: governmentStatus.accentColor }}
         />
+        
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-3 h-3 rounded-full animate-pulse shadow-lg"
+                style={{ backgroundColor: governmentStatus.accentColor }}
+              />
+              <span className="text-xs font-black uppercase tracking-wider text-gray-600 dark:text-gray-400">
+                Government Formation Status
+              </span>
+            </div>
+            <div className="text-4xl animate-bounce">
+              {governmentStatus.status === 'Majority Achieved' ? '🏆' :
+               governmentStatus.status === 'Majority Likely' ? '📈' :
+               governmentStatus.status === 'Hung Parliament' ? '⚖️' :
+               governmentStatus.status === 'Coalition Likely' ? '🤝' :
+               governmentStatus.status === 'Clear Lead' ? '🥇' :
+               governmentStatus.status === 'No Clear Lead' ? '📊' : '⏳'}
+            </div>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+            <div>
+              <h3 
+                className={`text-3xl sm:text-5xl font-black mb-2 bg-gradient-to-r ${governmentStatus.color} bg-clip-text text-transparent`}
+              >
+                {governmentStatus.status}
+              </h3>
+              <p className="text-base sm:text-lg text-gray-700 dark:text-gray-300 font-medium">
+                {governmentStatus.description}
+              </p>
+            </div>
+            
+            <div className="flex items-center gap-4">
+              <div className="text-center px-6 py-4 rounded-xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+                <div className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                  Required
+                </div>
+                <div className="text-3xl font-black" style={{ color: governmentStatus.accentColor }}>
+                  {MAJORITY_SEATS}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Winner Declaration or Leading Alliance Announcement */}

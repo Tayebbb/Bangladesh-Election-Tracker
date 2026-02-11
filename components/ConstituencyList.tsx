@@ -6,13 +6,13 @@
  * PERF OPTIMIZATIONS:
  * - React.memo on sub-components to prevent cascading re-renders
  * - useMemo for resultMap, partyMap, and filtered list
- * - IntersectionObserver-based infinite scroll (no heavy npm dep)
+ * - Pagination for better performance (30 items per page)
  * - useCallback for filter handlers
  * - Search input sanitized to prevent HTML injection
  */
 
 import Link from 'next/link';
-import React, { useMemo, useState, useCallback, useRef, useEffect } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import type { Result, Party, Constituency } from '@/types';
 import { RESULT_STATUS } from '@/lib/constants';
 import { formatNumber } from '@/lib/utils';
@@ -24,15 +24,13 @@ interface Props {
   constituencies: Constituency[];
 }
 
-// PERF: Progressive rendering batch sizes
-const INITIAL_RENDER_COUNT = 30;
-const LOAD_MORE_COUNT = 30;
+// Pagination settings
+const ITEMS_PER_PAGE = 30;
 
 function ConstituencyListInner({ results, parties, constituencies }: Props) {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'partial' | 'completed'>('all');
   const [search, setSearch] = useState('');
-  const [visibleCount, setVisibleCount] = useState(INITIAL_RENDER_COUNT);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Build lookup maps
   const partyMap = useMemo(() => {
@@ -97,26 +95,16 @@ function ConstituencyListInner({ results, parties, constituencies }: Props) {
     return list;
   }, [constituencies, resultMap, statusFilter, search, partyMap]);
 
-  // Reset visible count when filters change
-  useEffect(() => {
-    setVisibleCount(INITIAL_RENDER_COUNT);
-  }, [statusFilter, search]);
+  // Calculate pagination
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentItems = filtered.slice(startIndex, endIndex);
 
-  // PERF: IntersectionObserver-based infinite scroll — loads more as user nears bottom
+  // Reset to page 1 when filters change
   useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && visibleCount < filtered.length) {
-          setVisibleCount(prev => Math.min(prev + LOAD_MORE_COUNT, filtered.length));
-        }
-      },
-      { rootMargin: '200px' }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [visibleCount, filtered.length]);
+    setCurrentPage(1);
+  }, [statusFilter, search]);
 
   // PERF: useCallback for stable handler references
   const handleStatusFilter = useCallback((s: 'all' | 'pending' | 'partial' | 'completed') => {
@@ -127,7 +115,10 @@ function ConstituencyListInner({ results, parties, constituencies }: Props) {
     setSearch(e.target.value);
   }, []);
 
-  const visibleItems = filtered.slice(0, visibleCount);
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   return (
     <div>
@@ -167,9 +158,8 @@ function ConstituencyListInner({ results, parties, constituencies }: Props) {
       </div>
 
       {/* List with enhanced cards */}
-      {/* PERF: Progressively rendered list with IntersectionObserver */}
       <div className="space-y-3">
-        {visibleItems.map(({ constituency, result }) => (
+        {currentItems.map(({ constituency, result }) => (
           <ConstituencyCard
             key={constituency.id}
             constituency={constituency}
@@ -177,13 +167,6 @@ function ConstituencyListInner({ results, parties, constituencies }: Props) {
             partyMap={partyMap}
           />
         ))}
-
-        {/* Sentinel element triggers loading more items */}
-        {visibleCount < filtered.length && (
-          <div ref={sentinelRef} className="py-4 text-center">
-            <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-bd-green border-r-transparent" />
-          </div>
-        )}
 
         {filtered.length === 0 && (
           <div className="py-20 text-center">
@@ -196,14 +179,88 @@ function ConstituencyListInner({ results, parties, constituencies }: Props) {
             <p className="text-sm text-gray-500 dark:text-gray-500">Try adjusting your filters or search query</p>
           </div>
         )}
-        {visibleCount >= filtered.length && filtered.length > INITIAL_RENDER_COUNT && (
-          <div className="mt-8 text-center">
-            <p className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-gray-100 to-gray-200 dark:from-slate-800 dark:to-slate-700 px-6 py-3 text-xs font-bold text-gray-700 dark:text-gray-300 shadow-lg">
-              <span>Showing all {filtered.length} constituencies</span>
-            </p>
-          </div>
-        )}
       </div>
+
+      {/* Pagination - only show if more than 1 page */}
+      {totalPages > 1 && (
+        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+            Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} constituencies
+          </p>
+          
+          <div className="flex items-center gap-2">
+            {/* Previous Button */}
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="group relative rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-slate-700 hover:border-bd-green dark:hover:border-emerald-500 hover:scale-105 disabled:hover:scale-100 disabled:hover:border-gray-200 dark:disabled:hover:border-slate-700 shadow-md hover:shadow-xl"
+            >
+              <span className="flex items-center gap-2">
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                </svg>
+                Previous
+              </span>
+            </button>
+
+            {/* Page Numbers */}
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                // Show first page, last page, current page, and pages around current
+                const showPage = 
+                  page === 1 || 
+                  page === totalPages || 
+                  (page >= currentPage - 1 && page <= currentPage + 1);
+                
+                // Show ellipsis
+                const showEllipsisBefore = page === currentPage - 2 && currentPage > 3;
+                const showEllipsisAfter = page === currentPage + 2 && currentPage < totalPages - 2;
+
+                if (showEllipsisBefore || showEllipsisAfter) {
+                  return (
+                    <span key={page} className="px-2 text-gray-400 dark:text-gray-500">
+                      ···
+                    </span>
+                  );
+                }
+
+                if (!showPage) return null;
+
+                return (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`relative rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-300 shadow-md hover:shadow-xl ${
+                      currentPage === page
+                        ? 'bg-gradient-to-r from-bd-green via-emerald-500 to-emerald-600 dark:from-emerald-600 dark:via-emerald-500 dark:to-emerald-400 text-white scale-105 ring-2 ring-emerald-300 dark:ring-emerald-500/50'
+                        : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-slate-700 hover:border-bd-green dark:hover:border-emerald-500 hover:scale-105'
+                    }`}
+                  >
+                    {currentPage === page && (
+                      <div className="absolute inset-0 rounded-xl bg-white/30 animate-pulse" />
+                    )}
+                    <span className="relative">{page}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Next Button */}
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="group relative rounded-xl px-4 py-2.5 text-sm font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border-2 border-gray-200 dark:border-slate-700 hover:border-bd-green dark:hover:border-emerald-500 hover:scale-105 disabled:hover:scale-100 disabled:hover:border-gray-200 dark:disabled:hover:border-slate-700 shadow-md hover:shadow-xl"
+            >
+              <span className="flex items-center gap-2">
+                Next
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
