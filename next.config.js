@@ -27,7 +27,6 @@ const nextConfig = {
     if (!isServer) {
       config.optimization = {
         ...config.optimization,
-        usedExports: true,
         sideEffects: false,
         moduleIds: 'deterministic',
         runtimeChunk: 'single',
