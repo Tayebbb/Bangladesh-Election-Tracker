@@ -124,7 +124,7 @@ export default async function ArticlePage({ params }: Props) {
                 if (paragraph.trim() === '') return null;
                 
                 // SECURITY: Sanitize content before rendering — strips scripts and event handlers
-                let formattedParagraph = sanitizeNewsContent(paragraph)
+                const formattedParagraph = sanitizeNewsContent(paragraph)
                   .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                   .replace(/\*(.*?)\*/g, '<em>$1</em>');
 

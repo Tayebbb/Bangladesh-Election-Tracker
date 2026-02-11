@@ -10,8 +10,8 @@ import { PageLoader } from '@/components/LoadingSpinner';
 import { useParties, useConstituencyResult } from '@/hooks';
 import { RESULT_STATUS } from '@/lib/constants';
 import { formatNumber, formatPercentage, getRelativeTime, calculatePercentage } from '@/lib/utils';
-import { useEffect, useState, useMemo, useCallback } from 'react';
-import { getConstituencyById, normalizeConstituencyId } from '@/lib/firestore';
+import { useEffect, useState, useMemo } from 'react';
+import { getConstituencyById } from '@/lib/firestore';
 import type { Constituency } from '@/types';
 
 export default function ConstituencyDetailPage() {

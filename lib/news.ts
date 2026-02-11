@@ -192,7 +192,7 @@ export async function createNews(data: NewsArticleForm, authorId: string): Promi
 /**
  * Update an existing news article
  */
-export async function updateNews(id: string, data: NewsArticleForm, authorId: string): Promise<void> {
+export async function updateNews(id: string, data: NewsArticleForm): Promise<void> {
   try {
     const docRef = doc(db, COLLECTION_NAME, id);
     const existingDoc = await getDoc(docRef);

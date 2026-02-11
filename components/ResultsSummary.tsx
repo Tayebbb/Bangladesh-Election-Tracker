@@ -66,7 +66,8 @@ export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts
   };
 
   // Calculate government formation status
-  const governmentStatus = useMemo(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _governmentStatus = useMemo(() => {
     if (summary.declaredSeats === 0) {
       return {
         status: 'No Results Yet',

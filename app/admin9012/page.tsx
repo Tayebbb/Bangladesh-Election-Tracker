@@ -6,11 +6,10 @@ import Header from '@/components/Header';
 import AdminLogin from '@/components/AdminLogin';
 import AdminPanel from '@/components/AdminPanel';
 import { PageLoader } from '@/components/LoadingSpinner';
-import { useAuth, useParties } from '@/hooks';
+import { useAuth } from '@/hooks';
 
 export default function AdminPage() {
-  const { user, adminUser, loading: authLoading, error, login, logout, isAuthenticated } = useAuth();
-  const { parties } = useParties();
+  const { adminUser, loading: authLoading, error, login, logout, isAuthenticated } = useAuth();
 
   return (
     <>
@@ -19,7 +18,7 @@ export default function AdminPage() {
         {authLoading ? (
           <PageLoader />
         ) : isAuthenticated && adminUser ? (
-          <AdminPanel parties={parties} adminUser={adminUser} onLogout={logout} />
+          <AdminPanel adminUser={adminUser} onLogout={logout} />
         ) : (
           <AdminLogin onLogin={login} error={error} loading={authLoading} />
         )}

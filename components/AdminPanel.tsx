@@ -7,15 +7,14 @@
    Grouped by district using the static divisions data for name lookups. */
 
 import { useState, useMemo, useCallback, useEffect, type FormEvent } from 'react';
-import type { Party, AdminUser, Result } from '@/types';
+import type { AdminUser, Result } from '@/types';
 import { divisions } from '@/data/divisions';
 import { saveResult, getResultByConstituency, getAllConstituencyDocuments } from '@/lib/firestore';
 import { formatNumber, formatPercentage } from '@/lib/utils';
-import { getPartyById, getPartyByName, normalizePartyKey } from '@/data/parties';
+import { getPartyById, normalizePartyKey } from '@/data/parties';
 import { validateVoteCount, checkRateLimit } from '@/lib/validation';
 
 interface Props {
-  parties: Party[];
   adminUser: AdminUser;
   onLogout: () => void;
 }
@@ -75,7 +74,7 @@ function prettifyName(docId: string): string {
   return docId.replace(/(^|-)(\w)/g, (_, sep, ch) => (sep === '-' ? '-' : '') + ch.toUpperCase());
 }
 
-export default function AdminPanel({ parties, adminUser, onLogout }: Props) {
+export default function AdminPanel({ adminUser, onLogout }: Props) {
   const [allConstituencies, setAllConstituencies] = useState<FirebaseConstituency[]>([]);
   const [loadingList, setLoadingList] = useState(true);
   const [search, setSearch] = useState('');

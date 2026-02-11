@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function SeatCounter({ seatCounts, declaredSeats, showAll = false }: Props) {
-  const { TOTAL_SEATS, MAJORITY_SEATS } = ELECTION_CONFIG;
+  const { TOTAL_SEATS } = ELECTION_CONFIG;
   const displayed = showAll ? seatCounts : seatCounts.slice(0, 2);
 
   return (
