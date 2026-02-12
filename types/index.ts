@@ -214,7 +214,7 @@ export interface SubmitResultPayload {
 export interface FilterState {
   division: string | null;
   district: string | null;
-  status: 'all' | 'pending' | 'completed';
+  status: 'all' | 'pending' | 'partial' | 'counting' | 'completed';
 }
 
 export interface MapTooltipData {

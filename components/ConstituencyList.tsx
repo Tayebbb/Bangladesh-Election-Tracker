@@ -34,7 +34,7 @@ const INITIAL_RENDER_COUNT = 30;
 const LOAD_MORE_COUNT = 30;
 
 function ConstituencyListInner({ results, parties, constituencies, enablePagination = false, itemsPerPage = 20 }: Props) {
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'partial' | 'completed'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'partial' | 'counting' | 'completed'>('all');
   const [search, setSearch] = useState('');
   const [visibleCount, setVisibleCount] = useState(INITIAL_RENDER_COUNT);
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,11 +92,11 @@ function ConstituencyListInner({ results, parties, constituencies, enablePaginat
       });
     }
 
-    // Sort: completed first, then partial, then pending
+    // Sort: completed first, then partial, then counting, then pending
     list.sort((a, b) => {
-      const order = { completed: 0, partial: 1, pending: 2 };
-      const aOrder = a.result ? order[a.result.status] : 2;
-      const bOrder = b.result ? order[b.result.status] : 2;
+      const order = { completed: 0, partial: 1, counting: 2, pending: 3 };
+      const aOrder = a.result ? order[a.result.status] : 3;
+      const bOrder = b.result ? order[b.result.status] : 3;
       return aOrder - bOrder;
     });
 
@@ -130,7 +130,7 @@ function ConstituencyListInner({ results, parties, constituencies, enablePaginat
   }, [visibleCount, filtered.length, enablePagination]);
 
   // PERF: useCallback for stable handler references
-  const handleStatusFilter = useCallback((s: 'all' | 'pending' | 'partial' | 'completed') => {
+  const handleStatusFilter = useCallback((s: 'all' | 'pending' | 'partial' | 'counting' | 'completed') => {
     setStatusFilter(s);
   }, []);
 
@@ -154,7 +154,7 @@ function ConstituencyListInner({ results, parties, constituencies, enablePaginat
       {/* Filters with modern design */}
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex gap-2 overflow-x-auto py-1 px-1 scrollbar-hide">
-          {(['all', 'completed', 'partial', 'pending'] as const).map((s) => (
+          {(['all', 'completed', 'partial', 'counting', 'pending'] as const).map((s) => (
             <button
               key={s}
               onClick={() => handleStatusFilter(s)}

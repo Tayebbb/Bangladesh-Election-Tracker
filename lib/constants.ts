@@ -33,7 +33,8 @@ export const PARTY_COLORS: Record<string, string> = {
 // Result status labels
 export const RESULT_STATUS = {
   pending: { label: 'Pending', color: 'bg-gray-200 text-gray-700' },
-  partial: { label: 'Counting', color: 'bg-yellow-100 text-yellow-800' },
+  partial: { label: 'Partial', color: 'bg-yellow-100 text-yellow-800' },
+  counting: { label: 'Counting', color: 'bg-blue-100 text-blue-800' },
   completed: { label: 'Declared', color: 'bg-green-100 text-green-800' },
 } as const;
 
