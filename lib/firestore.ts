@@ -513,7 +513,7 @@ async function updateElectionSummary(): Promise<void> {
       if (seatCounts[result.winnerPartyId]) {
         seatCounts[result.winnerPartyId].seats++;
       }
-    } else if (result.status === 'partial') {
+    } else if (result.status === 'partial' || result.status === 'counting') {
       // Find current leader
       const leader = Object.entries(result.partyVotes).sort(([, a], [, b]) => b - a)[0];
       if (leader && seatCounts[leader[0]]) {
