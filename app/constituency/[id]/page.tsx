@@ -105,7 +105,7 @@ export default function ConstituencyDetailPage() {
                     <span className="text-xl sm:text-2xl">{winnerParty.symbol}</span>
                     <div className="min-w-0">
                       <p className="text-sm sm:text-base font-bold truncate" style={{ color: winnerParty.color }}>
-                        {winnerParty.name} wins
+                        {winnerParty.name} {status === 'completed' ? 'wins' : 'leading'}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mt-0.5">
                         Margin: {formatNumber(result.margin)} ({formatPercentage(result.marginPercentage)})

@@ -425,7 +425,7 @@ export async function saveResult(payload: SaveResultPayload): Promise<void> {
     constituencyId: actualDocId,  // Use the actual document ID we decided on
     partyVotes,
     allianceVotes,
-    winnerPartyId: status === 'completed' ? winnerId : null,
+    winnerPartyId: winnerId, // Always show current leader, regardless of status
     winnerAllianceId,
     winnerCandidateId: null,
     totalVotes,
