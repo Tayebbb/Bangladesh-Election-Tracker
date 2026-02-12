@@ -19,9 +19,20 @@ function ResultsSummary({ summary, seatCounts, allianceSeatCounts }: Props) {
   const [expandedAlliances, setExpandedAlliances] = useState<Set<string>>(new Set());
   const { TOTAL_SEATS, MAJORITY_SEATS } = ELECTION_CONFIG;
 
-  // Sort alliances by percentage (highest first)
+  // Sort alliances by seats first, then by vote percentage
   const sortedAlliances = useMemo(() => {
-    return [...allianceSeatCounts].sort((a, b) => b.votePercentage - a.votePercentage);
+    return [...allianceSeatCounts].sort((a, b) => {
+      // Sort by total seats (declared + leading) first
+      const aTotal = a.seats + a.leadingSeats;
+      const bTotal = b.seats + b.leadingSeats;
+      if (aTotal !== bTotal) return bTotal - aTotal;
+      
+      // Then by declared seats
+      if (a.seats !== b.seats) return b.seats - a.seats;
+      
+      // Finally by vote percentage
+      return b.votePercentage - a.votePercentage;
+    });
   }, [allianceSeatCounts]);
 
   // Check if there's a winner (alliance or party with >= 151 seats)

@@ -83,7 +83,7 @@ export function aggregateAllianceSeatCounts(results: Result[]): AllianceSeatCoun
     // Count seats
     if (result.status === 'completed') {
       allianceData[allianceId].seats[partyId] = (allianceData[allianceId].seats[partyId] || 0) + 1;
-    } else if (result.status === 'partial') {
+    } else if (result.status === 'partial' || result.status === 'counting') {
       allianceData[allianceId].leadingSeats[partyId] = (allianceData[allianceId].leadingSeats[partyId] || 0) + 1;
     }
 
