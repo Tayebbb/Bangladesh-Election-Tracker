@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { formatNumber, formatPercentage } from '@/lib/utils';
 
 interface Entry {
@@ -12,7 +13,7 @@ interface Entry {
   isWinner?: boolean;
 }
 
-export default function VoteBar({ entries }: { entries: Entry[] }) {
+function VoteBar({ entries }: { entries: Entry[] }) {
   const sorted = [...entries].sort((a, b) => b.votes - a.votes);
   const maxVotes = sorted[0]?.votes || 1;
 
@@ -49,3 +50,5 @@ export default function VoteBar({ entries }: { entries: Entry[] }) {
     </div>
   );
 }
+
+export default memo(VoteBar);

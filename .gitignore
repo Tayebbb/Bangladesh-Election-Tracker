@@ -32,3 +32,17 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# development and test files
+debug.js
+test.js
+test.html
+tmpclaude-*
+*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

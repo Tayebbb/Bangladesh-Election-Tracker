@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, memo } from 'react';
 import Image from 'next/image';
 import { ChartBarIcon, CheckCircleIcon, ArrowTrendingUpIcon } from '@heroicons/react/24/outline';
 import type { ElectionSummary, SeatCount, AllianceSeatCount } from '@/types';
@@ -14,7 +14,7 @@ interface Props {
   allianceSeatCounts: AllianceSeatCount[];
 }
 
-export default function ResultsSummary({ summary, seatCounts, allianceSeatCounts }: Props) {
+function ResultsSummary({ summary, seatCounts, allianceSeatCounts }: Props) {
   const [showAll, setShowAll] = useState(false);
   const [expandedAlliances, setExpandedAlliances] = useState<Set<string>>(new Set());
   const { TOTAL_SEATS, MAJORITY_SEATS } = ELECTION_CONFIG;
@@ -604,3 +604,5 @@ function MetricCard({
     </div>
   );
 }
+
+export default memo(ResultsSummary);

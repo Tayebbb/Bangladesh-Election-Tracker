@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import Image from 'next/image';
 import type { AllianceSeatCount } from '@/types';
 
@@ -11,7 +11,7 @@ interface Props {
 
 const UNDECLARED_COLOR = '#9CA3AF'; // gray-400 - better visibility in both light and dark modes
 
-export default function ParliamentSeats({ allianceSeatCounts, totalSeats }: Props) {
+function ParliamentSeats({ allianceSeatCounts, totalSeats }: Props) {
   // Calculate angles for each alliance segment + undeclared
   const segments = useMemo(() => {
     const TOTAL_PARLIAMENT_SEATS = 300;
@@ -250,3 +250,5 @@ export default function ParliamentSeats({ allianceSeatCounts, totalSeats }: Prop
     </div>
   );
 }
+
+export default memo(ParliamentSeats);

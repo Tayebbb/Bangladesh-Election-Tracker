@@ -83,7 +83,7 @@ export default function AdminPanel({ adminUser, onLogout }: Props) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<CandidateEntry[]>([]);
   const [voteInputs, setVoteInputs] = useState<VoteInput[]>([]);
-  const [status, setStatus] = useState<'partial' | 'completed'>('partial');
+  const [status, setStatus] = useState<'completed'>('completed');
   const [saving, setSaving] = useState(false);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -200,13 +200,13 @@ export default function AdminPanel({ adminUser, onLogout }: Props) {
           partyId: e.party,
           votes: result?.partyVotes[e.party] || 0,
         })));
-        if (result?.status) setStatus(result.status as 'partial' | 'completed');
-        else setStatus('partial');
+        if (result?.status) setStatus(result.status as 'completed');
+        else setStatus('completed');
       })
       .catch(() => {
         setVoteInputs(entries.map(e => ({ partyId: e.party, votes: 0 })));
         setExistingResult(null);
-        setStatus('partial');
+        setStatus('completed');
       })
       .finally(() => setLoadingId(null));
   }, [activeId]);
@@ -451,10 +451,9 @@ export default function AdminPanel({ adminUser, onLogout }: Props) {
                               <div className="flex items-center gap-2 sm:ml-auto">
                                 <select
                                   value={status}
-                                  onChange={e => setStatus(e.target.value as 'partial' | 'completed')}
+                                  onChange={e => setStatus(e.target.value as 'completed')}
                                   className="rounded-md border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-1.5 text-xs text-gray-900 dark:text-gray-100 outline-none focus:border-bd-green dark:focus:border-emerald-400 transition-all"
                                 >
-                                  <option value="partial">Counting</option>
                                   <option value="completed">Declared</option>
                                 </select>
                                 <button

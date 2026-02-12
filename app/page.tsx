@@ -3,41 +3,90 @@
 /* Landing page — Main dashboard showing election summary, seat counts,
    popular vote percentages, and a constituency list. */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import dynamic from 'next/dynamic';
-import Header from '@/components/Header';
-import ElectionBanner from '@/components/ElectionBanner';
-import Footer from '@/components/Footer';
-import { PageLoader } from '@/components/LoadingSpinner';
+import Link from 'next/link';
 import { useParties, useResults, useSummary } from '@/hooks';
 import { getConstituencies } from '@/lib/firestore';
 import { aggregateAllianceSeatCounts } from '@/lib/alliances';
 import type { Constituency, SeatCount } from '@/types';
+import ResultsSummary from '@/components/ResultsSummary';
 
-// Dynamic imports for heavy components to reduce initial bundle size
-const ResultsSummary = dynamic(() => import('@/components/ResultsSummary'), {
-  loading: () => <PageLoader />,
+// Dynamic imports for non-critical components only
+const Header = dynamic(() => import('@/components/Header'), {
+  ssr: true
+});
+
+const ElectionBanner = dynamic(() => import('@/components/ElectionBanner'), {
+  ssr: true
+});
+
+const Footer = dynamic(() => import('@/components/Footer'), {
   ssr: false
 });
 
+// PERF: Lazy load constituency list only when scrolled into view
 const ConstituencyList = dynamic(() => import('@/components/ConstituencyList'), {
-  loading: () => <PageLoader />,
+  loading: () => (
+    <div className="animate-pulse space-y-2">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+      ))}
+    </div>
+  ),
   ssr: false
 });
 
 export default function HomePage() {
-  const { parties, loading: pLoading } = useParties();
-  const { results, loading: rLoading } = useResults();
+  const { parties } = useParties();
+  const { results } = useResults();
   const { summary } = useSummary(results);
   const [constituencies, setConstituencies] = useState<Constituency[]>([]);
-  const [cLoading, setCLoading] = useState(true);
+  const [cLoading, setCLoading] = useState(false);
+  const [shouldLoadConstituencies, setShouldLoadConstituencies] = useState(false);
+  const constituencyRef = useRef<HTMLDivElement>(null);
 
+  // PERF: Lazy load constituencies only when section is visible
   useEffect(() => {
+    if (!constituencyRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setShouldLoadConstituencies(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    observer.observe(constituencyRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // PERF: Fetch constituencies only when needed
+  useEffect(() => {
+    if (!shouldLoadConstituencies) return;
+
+    setCLoading(true);
+    const timeoutId = setTimeout(() => {
+      console.warn('Constituency loading taking too long, using fallback');
+      setCLoading(false);
+    }, 5000);
+
     getConstituencies()
       .then(setConstituencies)
-      .catch(console.error)
-      .finally(() => setCLoading(false));
-  }, []);
+      .catch(err => {
+        console.error('Failed to load constituencies:', err);
+        setConstituencies([]);
+      })
+      .finally(() => {
+        clearTimeout(timeoutId);
+        setCLoading(false);
+      });
+
+    return () => clearTimeout(timeoutId);
+  }, [shouldLoadConstituencies]);
 
   // Compute seat counts locally — no extra hooks / Firestore subscriptions
   const seatCounts = useMemo((): SeatCount[] => {
@@ -58,33 +107,44 @@ export default function HomePage() {
 
   const allianceSeatCounts = useMemo(() => aggregateAllianceSeatCounts(results), [results]);
 
-  if (pLoading || rLoading || cLoading) {
-    return (
-      <>
-        <Header />
-        <main className="mx-auto max-w-7xl px-3 sm:px-4 py-6 sm:py-8 md:py-10">
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-bd-green border-r-transparent" />
-              <p className="mt-4 text-sm font-medium text-gray-500 dark:text-gray-400">Loading election data...</p>
-            </div>
-          </div>
-        </main>
-      </>
-    );
-  }
-
   return (
     <>
       <Header />
       <ElectionBanner />
       <main className="mx-auto max-w-7xl px-3 sm:px-4 py-6 sm:py-8 md:py-10">
         <div className="space-y-8">
+          {/* Results summary loads instantly and updates with data as it arrives */}
           <ResultsSummary summary={summary} seatCounts={seatCounts} allianceSeatCounts={allianceSeatCounts} />
 
-          <section>
-            <h2 className="mb-3 text-base font-bold text-gray-900 dark:text-gray-100">Constituencies</h2>
-            <ConstituencyList results={results} parties={parties} constituencies={constituencies} enablePagination itemsPerPage={30} />
+          {/* PERF: Lazy-loaded constituency section with intersection observer */}
+          <section ref={constituencyRef}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">Constituencies</h2>
+              <Link 
+                href="/constituency" 
+                className="text-sm font-medium text-bd-green dark:text-emerald-400 hover:underline"
+              >
+                View All →
+              </Link>
+            </div>
+            
+            {!shouldLoadConstituencies ? (
+              <div className="rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-8 text-center">
+                <p className="text-sm text-gray-500 dark:text-gray-400">Scroll down to load constituencies...</p>
+              </div>
+            ) : cLoading ? (
+              <div className="flex items-center justify-center py-10">
+                <div className="inline-block h-6 w-6 animate-spin rounded-full border-3 border-solid border-bd-green border-r-transparent" />
+              </div>
+            ) : (
+              <ConstituencyList 
+                results={results} 
+                parties={parties} 
+                constituencies={constituencies} 
+                enablePagination 
+                itemsPerPage={10}
+              />
+            )}
           </section>
         </div>
       </main>

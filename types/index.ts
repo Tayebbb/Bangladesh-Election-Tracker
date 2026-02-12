@@ -103,7 +103,7 @@ export interface Result {
   totalVotes: number;
   margin: number;
   marginPercentage: number;
-  status: 'pending' | 'partial' | 'completed';
+  status: 'pending' | 'partial' | 'completed' | 'counting';
   updatedAt: Date;
   updatedBy: string;
 }
@@ -204,7 +204,7 @@ export interface VoteEntry {
 export interface SubmitResultPayload {
   constituencyId: string;
   entries: VoteEntry[];
-  status: 'partial' | 'completed';
+  status: 'completed';
 }
 
 // ============================================
@@ -214,7 +214,7 @@ export interface SubmitResultPayload {
 export interface FilterState {
   division: string | null;
   district: string | null;
-  status: 'all' | 'pending' | 'partial' | 'completed';
+  status: 'all' | 'pending' | 'completed';
 }
 
 export interface MapTooltipData {

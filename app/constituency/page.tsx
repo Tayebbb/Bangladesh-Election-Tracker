@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import ConstituencyPageClient from './ConstituencyPageClient';
 
+export const revalidate = 30; // Revalidate every 30 seconds
+
 /* SEO metadata for the constituencies listing page */
 export const metadata: Metadata = {
   title: 'All 300 Constituencies | Bangladesh Election Tracker 2026',

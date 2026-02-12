@@ -3,17 +3,27 @@
  * Run with: node scripts/reset-results.js
  */
 
+/* eslint-disable @typescript-eslint/no-var-requires */
 const { initializeApp } = require('firebase/app');
 const { getFirestore, collection, getDocs, deleteDoc, doc, setDoc, serverTimestamp } = require('firebase/firestore');
+require('dotenv').config({ path: '.env.local' });
 
+// Load Firebase config from environment variables
 const firebaseConfig = {
-  apiKey: 'AIzaSyAAArfD_jceLHDYjxXOe2cZtcNzfAfHT94',
-  authDomain: 'bd-election-live-tracker.firebaseapp.com',
-  projectId: 'bd-election-live-tracker',
-  storageBucket: 'bd-election-live-tracker.firebasestorage.app',
-  messagingSenderId: '896769840318',
-  appId: '1:896769840318:web:bb2e717b7e321e50b0baef',
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
+
+// Validate environment variables
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error('Error: Missing Firebase configuration in .env.local');
+  console.error('Please copy .env.example to .env.local and add your Firebase credentials.');
+  process.exit(1);
+}
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);

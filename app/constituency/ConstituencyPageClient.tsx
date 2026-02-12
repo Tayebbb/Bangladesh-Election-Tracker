@@ -3,13 +3,30 @@
 /* Constituency list page — client component with filters, search, and pagination */
 
 import { useEffect, useState } from 'react';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import ConstituencyList from '@/components/ConstituencyList';
-import { PageLoader } from '@/components/LoadingSpinner';
+import dynamic from 'next/dynamic';
 import { useParties, useResults } from '@/hooks';
 import { getConstituencies } from '@/lib/firestore';
 import type { Constituency } from '@/types';
+
+// Dynamic imports for better code splitting
+const Header = dynamic(() => import('@/components/Header'), {
+  ssr: true,
+});
+
+const Footer = dynamic(() => import('@/components/Footer'), {
+  ssr: false,
+});
+
+const ConstituencyList = dynamic(() => import('@/components/ConstituencyList'), {
+  loading: () => (
+    <div className="animate-pulse space-y-2">
+      {[...Array(10)].map((_, i) => (
+        <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+      ))}
+    </div>
+  ),
+  ssr: false,
+});
 
 export default function ConstituencyPageClient() {
   const { parties, loading: pLoading } = useParties();
@@ -28,7 +45,17 @@ export default function ConstituencyPageClient() {
     return (
       <>
         <Header />
-        <PageLoader />
+        <main className="mx-auto max-w-7xl px-3 sm:px-4 py-6 sm:py-8 md:py-10">
+          <div className="animate-pulse space-y-4">
+            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+            <div className="space-y-2 mt-8">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="h-20 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </main>
       </>
     );
   }

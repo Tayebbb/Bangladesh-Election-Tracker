@@ -3,6 +3,17 @@
 Real-time election results and seat counting for Bangladesh parliamentary elections.
 Built with Next.js 14, Firebase, TypeScript, and Tailwind CSS — optimized for performance and security.
 
+> **⚠️ IMPORTANT - Before Using This Repository:**
+>
+> This repository does NOT include sensitive credentials. You MUST:
+>
+> 1. Create your own Firebase project
+> 2. Set up your own environment variables
+> 3. Configure your own admin authentication
+> 4. Never commit `.env.local` or any files with real credentials
+>
+> See setup instructions below for details.
+
 ## Features
 
 ### 📊 Core Dashboard Features
@@ -112,14 +123,59 @@ firebase login
 firebase deploy --only firestore:rules
 ```
 
-### 3. Environment Variables
+**Note:** The admin panel is accessible only via the secret URL `/admin9012` (not visible in navigation).
+
+### 3. Create Admin User
+
+1. In Firebase Auth console, create a user (email + password)
+2. Note the user UID
+3. In Firestore, create document: `adminUsers/{uid}`
+   ```json
+   {
+     "email": "admin@example.com",
+     "displayName": "Admin",
+     "role": "admin",
+     "createdAt": "2026-01-01T00:00:00Z"
+   }
+   ```
+
+### 4. Environment Variables
 
 ```bash
 cp .env.example .env.local
 # Edit .env.local with your Firebase config values
 ```
 
-### 4. Run Development
+**Required variables:**
+
+```env
+# Firebase Configuration (Required)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+```
+
+**Optional variables:**
+
+```env
+# Google Analytics (Optional)
+NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+
+# Cloudflare Web Analytics (Optional)
+NEXT_PUBLIC_CF_ANALYTICS_TOKEN=your_cloudflare_beacon_token
+```
+
+> **🔒 Security Note:**
+>
+> - Never commit `.env.local` to version control
+> - All Firebase config values can be safely exposed (they're public by design)
+> - Security is handled by Firebase Security Rules, not by hiding config
+> - Use different Firebase projects for dev/staging/production
+
+### 5. Run Development
 
 ```bash
 npm run dev

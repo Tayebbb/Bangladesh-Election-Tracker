@@ -1,8 +1,19 @@
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import Header from '@/components/Header';
-import NewsGrid from '@/components/NewsGrid';
+import dynamic from 'next/dynamic';
 import { PageLoader } from '@/components/LoadingSpinner';
+
+// Dynamic imports for non-critical components
+const Header = dynamic(() => import('@/components/Header'), {
+  ssr: true,
+});
+
+const NewsGrid = dynamic(() => import('@/components/NewsGrid'), {
+  loading: () => <PageLoader />,
+  ssr: false,
+});
+
+export const revalidate = 60; // Revalidate every 60 seconds
 
 export const metadata: Metadata = {
   title: 'News - Bangladesh Election Tracker',

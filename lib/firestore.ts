@@ -30,6 +30,18 @@ import type {
 } from '@/types';
 
 // ============================================
+// Simple in-memory cache for better performance
+// ============================================
+const cache = {
+  parties: null as Party[] | null,
+  constituencies: null as Constituency[] | null,
+  partiesTimestamp: 0,
+  constituenciesTimestamp: 0,
+};
+
+const CACHE_DURATION = 300000; // 5 minutes cache (increased from 1 minute)
+
+// ============================================
 // District lookup (same pattern as AdminPanel)
 // ============================================
 
@@ -130,10 +142,22 @@ function normalizeResult(raw: Record<string, unknown>, docId: string): Result {
 // ============================================
 
 export async function getParties(): Promise<Party[]> {
+  // Return cached data if still fresh
+  const now = Date.now();
+  if (cache.parties && now - cache.partiesTimestamp < CACHE_DURATION) {
+    return cache.parties;
+  }
+
   const snapshot = await getDocs(
     query(collection(firestore, COLLECTIONS.PARTIES), orderBy('order'))
   );
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Party));
+  const parties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Party));
+  
+  // Update cache
+  cache.parties = parties;
+  cache.partiesTimestamp = now;
+  
+  return parties;
 }
 
 export function subscribeToParties(callback: (parties: Party[]) => void): Unsubscribe {
@@ -141,6 +165,9 @@ export function subscribeToParties(callback: (parties: Party[]) => void): Unsubs
     query(collection(firestore, COLLECTIONS.PARTIES), orderBy('order')),
     snapshot => {
       const parties = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Party));
+      // Update cache on real-time updates
+      cache.parties = parties;
+      cache.partiesTimestamp = Date.now();
       callback(parties);
     }
   );
@@ -151,10 +178,22 @@ export function subscribeToParties(callback: (parties: Party[]) => void): Unsubs
 // ============================================
 
 export async function getConstituencies(): Promise<Constituency[]> {
+  // Return cached data if still fresh
+  const now = Date.now();
+  if (cache.constituencies && now - cache.constituenciesTimestamp < CACHE_DURATION) {
+    return cache.constituencies;
+  }
+
   const snapshot = await getDocs(collection(firestore, COLLECTIONS.CONSTITUENCIES));
-  return snapshot.docs
+  const constituencies = snapshot.docs
     .map(d => buildConstituency(d.id))
     .sort((a, b) => a.name.localeCompare(b.name) || a.number - b.number);
+  
+  // Update cache
+  cache.constituencies = constituencies;
+  cache.constituenciesTimestamp = now;
+  
+  return constituencies;
 }
 
 export async function getConstituencyById(id: string): Promise<Constituency | null> {

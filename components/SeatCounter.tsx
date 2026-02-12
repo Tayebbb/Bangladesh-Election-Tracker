@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import type { SeatCount } from '@/types';
 import { ELECTION_CONFIG } from '@/lib/constants';
 import { formatNumber, formatPercentage } from '@/lib/utils';
@@ -10,7 +11,7 @@ interface Props {
   showAll?: boolean;
 }
 
-export default function SeatCounter({ seatCounts, declaredSeats, showAll = false }: Props) {
+function SeatCounter({ seatCounts, declaredSeats, showAll = false }: Props) {
   const { TOTAL_SEATS } = ELECTION_CONFIG;
   const displayed = showAll ? seatCounts : seatCounts.slice(0, 2);
 
@@ -71,3 +72,5 @@ export default function SeatCounter({ seatCounts, declaredSeats, showAll = false
     </div>
   );
 }
+
+export default memo(SeatCounter);
