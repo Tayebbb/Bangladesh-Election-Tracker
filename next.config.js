@@ -89,7 +89,7 @@ const nextConfig = {
     return [
       {
         // SECURITY: Apply security headers to all routes
-        source: '/(.*)',
+        source: '/:path*',
         headers: [
           // SECURITY: Prevent MIME type sniffing
           { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -130,7 +130,7 @@ const nextConfig = {
       },
       {
         // PERF: Cache static assets (images, fonts) for 1 year
-        source: '/:path*.(png|jpg|jpeg|gif|svg|ico|woff|woff2)',
+        source: '/:path*.:ext(png|jpg|jpeg|gif|svg|ico|woff|woff2)',
         headers: [
           { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
